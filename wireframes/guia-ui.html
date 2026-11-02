@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Tokens idénticos a mosaico-alta-fidelidad.html — mantener sincronizados */
+  :root{
+    --brand:#002259; --brand-2:#0047BA; --brand-ink:#ffffff; --brand-soft:#e6eefb; --sun:#FFC600;
+    --hidro:#0e7c86; --hidro-soft:#e3f4f5; --meteo:#0047BA; --meteo-soft:#e6eefb;
+    --bg:#f3f6fa; --surface:#ffffff; --surface-2:#f7f9fc; --border:#dde4ee; --text:#14212f; --muted:#5b6b7d;
+    --map-land:#dfe8f2; --map-stroke:#9fb3c8; --map-water:#eaf2fa;
+    --l1:#22834a; --l2:#f2c200; --l3:#f08c1a; --l4:#d93a2b; --l0:#6b7785;
+    --shadow:0 1px 2px rgba(16,33,55,.06),0 4px 16px rgba(16,33,55,.06);
+    --r:12px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --brand:#001a44; --brand-2:#6d9cff; --brand-soft:#15233f;
+      --hidro:#3fb8c2; --hidro-soft:#12303a; --meteo:#7aa2ff; --meteo-soft:#172a48;
+      --bg:#0d1520; --surface:#141f2d; --surface-2:#192637; --border:#26364a; --text:#e6edf5; --muted:#93a4b8;
+      --map-land:#1f3045; --map-stroke:#3c5470; --map-water:#101b28;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"]{
+    --brand:#001a44; --brand-2:#6d9cff; --brand-soft:#15233f;
+    --hidro:#3fb8c2; --hidro-soft:#12303a; --meteo:#7aa2ff; --meteo-soft:#172a48;
+    --bg:#0d1520; --surface:#141f2d; --surface-2:#192637; --border:#26364a; --text:#e6edf5; --muted:#93a4b8;
+    --map-land:#1f3045; --map-stroke:#3c5470; --map-water:#101b28;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit}
+  code{font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:1px 5px}
+  .container{max-width:1320px;margin:0 auto;padding:0 16px}
+  .proto{background:repeating-linear-gradient(45deg,#fff3cd,#fff3cd 10px,#ffeaa6 10px,#ffeaa6 20px);color:#5c4400;text-align:center;font-size:12px;font-weight:600;padding:4px 16px}
+
+  /* ---------- shell ---------- */
+  header.main{background:var(--brand);color:var(--brand-ink);position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  header.main .container{display:flex;align-items:center;gap:16px;min-height:60px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo-ph{width:40px;height:40px;border-radius:10px;border:2px dashed rgba(255,255,255,.55);display:grid;place-items:center;font-size:9px;font-weight:700;letter-spacing:.05em}
+  .brand-txt b{display:block;font-size:15px}
+  .brand-txt span{font-size:12px;opacity:.8}
+  .icon-btn{margin-left:auto;background:rgba(255,255,255,.12);border:0;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;display:grid;place-items:center}
+  .shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;padding-top:24px;padding-bottom:48px}
+  .toc{position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:2px;font-size:13px}
+  .toc a{padding:7px 10px;border-radius:8px;color:var(--muted);font-weight:500}
+  .toc a:hover{background:var(--surface);color:var(--text)}
+  .toc a.on{background:var(--brand-soft);color:var(--brand-2);font-weight:600}
+  .intro h1{margin:0 0 6px;font-size:28px;letter-spacing:-.02em}
+  .intro p{margin:0;color:var(--muted);max-width:760px}
+  section.g{padding-top:36px;scroll-margin-top:72px}
+  section.g>h2{margin:0 0 4px;font-size:20px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+  section.g>h2 .n{font-size:12px;font-weight:700;color:var(--brand-2);background:var(--brand-soft);border-radius:6px;padding:2px 7px}
+  section.g>p.lead{margin:0 0 16px;color:var(--muted);max-width:760px}
+  h3.sub{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 10px;font-weight:600}
+
+  /* ---------- componentes del portal (copiados) ---------- */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+  .card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .card-h h3{margin:0;font-size:14px;font-weight:600}
+  .card-b{padding:14px 16px}
+  .eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
+  .btn:hover{border-color:var(--brand-2)}
+  .btn.primary{background:var(--brand-2);border-color:var(--brand-2);color:#fff}
+  .btn:focus-visible,.seg button:focus-visible,select:focus-visible,.toc a:focus-visible{outline:2px solid var(--brand-2);outline-offset:2px}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .lv-2,.lv-3{color:#1b1b1b}
+  .lv-1{background:var(--l1);color:#fff}.lv-2{background:var(--l2)}.lv-3{background:var(--l3)}.lv-4{background:var(--l4);color:#fff}.lv-0{background:var(--l0);color:#fff}
+  .muted{color:var(--muted)}
+  .kpi{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px}
+  .kpi .v{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+  .kpi .l{font-size:12px;color:var(--muted)}
+  .kpi .d{font-size:12px;font-weight:600;margin-top:4px}
+  .prod{position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;transition:transform .15s,box-shadow .15s;overflow:hidden}
+  .prod:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(16,33,55,.12)}
+  .prod::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--acc)}
+  .prod .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc)}
+  .prod h3{margin:0;font-size:16px}
+  .prod p{margin:0;color:var(--muted);font-size:13px}
+  .prod .stat{display:flex;align-items:baseline;gap:8px;margin-top:auto;padding-top:10px;border-top:1px dashed var(--border)}
+  .prod .stat b{font-size:20px}
+  .prod .go{color:var(--acc);font-weight:600;font-size:13px;margin-left:auto}
+  .alert-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:var(--r);background:linear-gradient(90deg,color-mix(in srgb,var(--l4) 14%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--l4) 35%,var(--border))}
+  .alert-bar .ttl{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--l4)}
+  .alert-bar .btn{margin-left:auto}
+  .field label.t{display:block;font-size:12px;font-weight:600;margin-bottom:6px}
+  select,input[type=date]{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font:inherit;font-size:13px}
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .seg button{border:1px solid var(--border);background:var(--surface-2);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12.5px}
+  .seg button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+  .checks label{display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0;cursor:pointer}
+  .subnav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px}
+  .subnav a{padding:8px 14px;border-radius:7px;font-weight:500;font-size:13px;display:flex;gap:6px;align-items:center;color:var(--muted)}
+  .subnav a.on{background:var(--acc);color:#fff}
+  table.tb{width:100%;border-collapse:collapse;font-size:12.5px}
+  .tb th{text-align:left;font-weight:600;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;padding:8px 6px;border-bottom:1px solid var(--border)}
+  .tb td{padding:8px 6px;border-bottom:1px solid var(--border)}
+  .tb tr.sel td{background:var(--acc-soft)}
+  .tb tbody tr:hover td{background:var(--surface-2)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .aviso{display:block;text-align:left;width:100%;border:1px solid var(--border);border-left:6px solid var(--lc);background:var(--surface);border-radius:10px;padding:12px 14px;cursor:pointer}
+  .aviso.on{outline:2px solid var(--acc);outline-offset:1px}
+  .aviso h4{margin:6px 0 4px;font-size:14px}
+  .aviso small{color:var(--muted);display:block}
+  .timeline{display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .timeline input{flex:1;accent-color:var(--acc)}
+  .play{width:34px;height:34px;border-radius:50%;border:0;background:var(--acc);color:#fff;cursor:pointer;display:grid;place-items:center}
+  .legend{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;box-shadow:var(--shadow);display:inline-flex;flex-direction:column;gap:4px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+  .fc-text{font-size:13px;color:var(--muted);margin:0;border-left:3px solid var(--acc);padding-left:10px}
+
+  /* ---------- piezas de la guía ---------- */
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .principles .card-b h4{margin:8px 0 4px;font-size:14px}
+  .principles .card-b p{margin:0;font-size:13px;color:var(--muted)}
+  .principles .num-b{font-size:12px;font-weight:700;color:var(--brand-2)}
+  .sw{overflow:hidden;cursor:pointer;text-align:left;padding:0;border:1px solid var(--border);background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+  .sw .c{height:64px;border-bottom:1px solid var(--border)}
+  .sw .i{padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+  .sw .i b{font-size:13px}
+  .sw .i span{font-size:12px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+  .sw .i em{font-style:normal;font-size:12px;color:var(--muted)}
+  .levels{width:100%;border-collapse:collapse;font-size:13px}
+  .levels th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--border)}
+  .levels td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+  .levels tr:last-child td{border-bottom:0}
+  .ratio{font-variant-numeric:tabular-nums;font-weight:600}
+  .ok{color:var(--l1)} .bad{color:var(--l4)}
+  [data-theme="dark"] .ok{color:#5fd08b}
+  .type-row{display:grid;grid-template-columns:150px minmax(0,1fr) 170px;gap:16px;align-items:baseline;padding:12px 16px;border-bottom:1px solid var(--border)}
+  .type-row:last-child{border-bottom:0}
+  .type-row .meta{font-size:12px;color:var(--muted)}
+  .type-row .spec{font-size:12px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;text-align:right}
+  .space{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+  .space div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .space i{display:block;background:var(--brand-2);border-radius:3px;opacity:.85}
+  .rad{display:flex;gap:14px;flex-wrap:wrap}
+  .rad div{width:84px;height:64px;background:var(--brand-soft);border:1px solid var(--brand-2);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--brand-2)}
+  .icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+  .icons .card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;font-size:12px;color:var(--muted)}
+  .icons .card span{color:var(--text)}
+  .demo{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .spec-list{margin:10px 0 0;padding-left:18px;font-size:13px;color:var(--muted)}
+  .spec-list li{margin:3px 0}
+  .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .do-dont>div{border-radius:10px;padding:12px 14px;font-size:13px;border:1px solid var(--border);background:var(--surface)}
+  .do-dont .yes{border-top:4px solid var(--l1)}
+  .do-dont .no{border-top:4px solid var(--l4)}
+  .do-dont b{display:block;margin-bottom:4px}
+  .bp{width:100%;border-collapse:collapse;font-size:13px}
+  .bp th,.bp td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+  .bp th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+  .bp tr:last-child td{border-bottom:0}
+  .grid-vis{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;margin-bottom:10px}
+  .grid-vis i{height:40px;background:color-mix(in srgb,var(--brand-2) 18%,transparent);border-radius:4px}
+  .lay{display:grid;gap:8px;font-size:11.5px;font-weight:600;color:var(--muted)}
+  .lay>div{background:var(--surface-2);border:1px dashed var(--map-stroke);border-radius:8px;display:grid;place-items:center;min-height:80px;text-align:center;padding:4px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:99}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:1000px){
+    .shell{grid-template-columns:minmax(0,1fr)}
+    .toc{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px}
+    .toc a{white-space:nowrap}
+    .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .g3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media (max-width:640px){
+    .g2,.g3,.g4,.do-dont{grid-template-columns:1fr}
+    .type-row{grid-template-columns:1fr;gap:4px}
+    .type-row .spec{text-align:left}
+    .brand-txt span{display:none}
+    .levels .hide-m{display:none}
+    .bp-wrap,.lv-wrap{overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+<div class="proto">PROTOTIPO · Guía de UI del Portal de Contingencia · Datos de ejemplo</div>
+<header class="main">
+  <div class="container">
+    <a class="brand" href="mosaico-alta-fidelidad.html">
+      <div class="logo-ph" aria-label="Espacio para logo">LOGO</div>
+      <div class="brand-txt"><b>Guía de UI</b><span>Portal de Contingencia · SENAMHI</span></div>
+    </a>
+    <button class="icon-btn" id="theme" title="Cambiar tema" aria-label="Cambiar tema claro/oscuro">◐</button>
+  </div>
+</header>
+
+<div class="container shell">
+  <nav class="toc" aria-label="Secciones de la guía">
+    <a href="#principios">1 · Principios</a>
+    <a href="#color">2 · Color</a>
+    <a href="#niveles">3 · Niveles de aviso</a>
+    <a href="#tipografia">4 · Tipografía</a>
+    <a href="#espacio">5 · Espacio y forma</a>
+    <a href="#iconos">6 · Iconografía</a>
+    <a href="#componentes">7 · Componentes</a>
+    <a href="#datos">8 · Mapas y gráficos</a>
+    <a href="#grid">9 · Grid y breakpoints</a>
+    <a href="#a11y">10 · Accesibilidad</a>
+    <a href="#contenido">11 · Contenido</a>
+    <a href="#mosaico">12 · Mosaico</a>
+  </nav>
+
+  <main>
+    <div class="intro">
+      <div class="eyebrow">Sistema de diseño · v0.1</div>
+      <h1>Guía de UI</h1>
+      <p>Referencia de estilos y componentes para el Portal de Contingencia del SENAMHI. Todos los valores salen de <code>mosaico-alta-fidelidad.html</code>: si cambias un token aquí, cámbialo también allí. Haz clic en un color para copiar su valor.</p>
+    </div>
+
+    <!-- 1 -->
+    <section class="g" id="principios">
+      <h2><span class="n">01</span>Principios</h2>
+      <p class="lead">Es un portal de contingencia: se usa cuando el canal principal falla y la gente necesita información para decidir rápido.</p>
+      <div class="grid g4 principles">
+        <div class="card"><div class="card-b"><span class="num-b">01</span><h4>Lo urgente primero</h4><p>Los avisos vigentes y su nivel se ven sin hacer scroll, en cualquier pantalla.</p></div></div>
+        <div class="card"><div class="card-b"><span class="num-b">02</span><h4>Una plantilla, seis productos</h4><p>Filtros · mapa · detalle. Quien aprende un producto ya sabe usar los otros cinco.</p></div></div>
+        <div class="card"><div class="card-b"><span class="num-b">03</span><h4>Ligero y resistente</h4><p>Sin dependencias pesadas, mapas en SVG y carga rápida en redes lentas o móviles.</p></div></div>
+        <div class="card"><div class="card-b"><span class="num-b">04</span><h4>Nunca solo color</h4><p>Todo nivel se acompaña de texto («▲ FUERTE») y, en el mapa, de un patrón o una etiqueta.</p></div></div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="g" id="color">
+      <h2><span class="n">02</span>Color</h2>
+      <p class="lead">Paleta azul institucional, con un acento propio para cada eje temático. Los valores se muestran según el tema activo: cambia a modo oscuro para ver sus equivalentes.</p>
+      <h3 class="sub">Marca</h3>
+      <div class="grid g4" id="sw-brand"></div>
+      <h3 class="sub">Ejes temáticos</h3>
+      <div class="grid g4" id="sw-dom"></div>
+      <h3 class="sub">Superficies y texto</h3>
+      <div class="grid g4" id="sw-neutral"></div>
+      <h3 class="sub">Mapa</h3>
+      <div class="grid g4" id="sw-map"></div>
+    </section>
+
+    <!-- 3 -->
+    <section class="g" id="niveles">
+      <h2><span class="n">03</span>Niveles de aviso y estado</h2>
+      <p class="lead">Una sola escala de 4 niveles para avisos (meteorológicos e hidrológicos) y para el estado de las estaciones. El contraste se calcula aquí en vivo con los tokens actuales.</p>
+      <div class="card lv-wrap"><table class="levels">
+        <thead><tr><th>Token</th><th>Chip de aviso</th><th>Chip de estado</th><th class="hide-m">Uso</th><th>Contraste del texto</th></tr></thead>
+        <tbody id="lv-rows"></tbody>
+      </table></div>
+      <div class="do-dont">
+        <div class="yes"><b>Sí</b>Mostrar el nombre del nivel junto al color: <span class="chip lv-3">▲ FUERTE</span></div>
+        <div class="no"><b>No</b>Usar solo un punto de color, sin el nombre del nivel (Moderada · Fuerte · Extrema).</div>
+      </div>
+      <p class="muted" style="font-size:13px;margin-top:12px" id="lv-note"></p>
+    </section>
+
+    <!-- 4 -->
+    <section class="g" id="tipografia">
+      <h2><span class="n">04</span>Tipografía</h2>
+      <p class="lead"><b>Inter</b> (Google Fonts), con respaldo de la fuente del sistema. Base de 14 px e interlineado de 1,5. Las cifras de tablas y KPIs usan dígitos tabulares.</p>
+      <div class="card">
+        <div class="type-row"><span class="meta">Título de página</span><span style="font-size:24px;font-weight:700;letter-spacing:-.01em">Monitoreo hidrológico</span><span class="spec">24 / 700 / −0.01em</span></div>
+        <div class="type-row"><span class="meta">Cifra KPI</span><span style="font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums">2 340,5</span><span class="spec">24 / 700 / tabular</span></div>
+        <div class="type-row"><span class="meta">Sección</span><span style="font-size:18px;font-weight:700">Productos hidrológicos</span><span class="spec">18 / 700</span></div>
+        <div class="type-row"><span class="meta">Título de tarjeta</span><span style="font-size:16px;font-weight:600">Pronósticos meteorológicos</span><span class="spec">16 / 600</span></div>
+        <div class="type-row"><span class="meta">Cabecera de panel</span><span style="font-size:14px;font-weight:600">Estaciones (12)</span><span class="spec">14 / 600</span></div>
+        <div class="type-row"><span class="meta">Cuerpo</span><span>Se prevé que los ríos de la vertiente del Atlántico mantengan tendencia ascendente.</span><span class="spec">14 / 400 / 1.5</span></div>
+        <div class="type-row"><span class="meta">Secundario</span><span style="font-size:13px;color:var(--muted)">Caudales y niveles de los principales ríos en tiempo casi real.</span><span class="spec">13 / 400 / muted</span></div>
+        <div class="type-row"><span class="meta">Eyebrow</span><span class="eyebrow">Estación seleccionada</span><span class="spec">11.5 / 600 / +0.08em / MAYÚS</span></div>
+        <div class="type-row"><span class="meta">Leyenda / nota</span><span style="font-size:11.5px;color:var(--muted)">Banda sombreada: rango de incertidumbre del modelo.</span><span class="spec">11.5 / 400</span></div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="g" id="espacio">
+      <h2><span class="n">05</span>Espacio y forma</h2>
+      <p class="lead">Escala de espaciado en múltiplos de 2 y 4 px. Los paneles se separan 16 px y el contenido de las tarjetas lleva 14 × 16 px de relleno.</p>
+      <div class="grid g2">
+        <div class="card"><div class="card-h"><h3>Espaciado</h3></div><div class="card-b"><div class="space">
+          <div><i style="width:4px;height:4px"></i>4</div><div><i style="width:8px;height:8px"></i>8</div><div><i style="width:12px;height:12px"></i>12</div><div><i style="width:16px;height:16px"></i>16</div><div><i style="width:24px;height:24px"></i>24</div><div><i style="width:32px;height:32px"></i>32</div><div><i style="width:40px;height:40px"></i>40</div>
+        </div><ul class="spec-list"><li>8: separación interna de chips y botones.</li><li>16: hueco entre paneles y gutter lateral.</li><li>30–40: separación entre secciones de la home.</li></ul></div></div>
+        <div class="card"><div class="card-h"><h3>Radios y sombras</h3></div><div class="card-b"><div class="rad">
+          <div style="border-radius:999px">pill</div><div style="border-radius:8px">8 · control</div><div style="border-radius:10px">10 · interno</div><div style="border-radius:12px;box-shadow:var(--shadow)">12 · tarjeta</div>
+        </div><ul class="spec-list"><li><code>--r: 12px</code> para tarjetas y el mapa.</li><li><code>--shadow</code> es una sombra suave de dos capas; al hacer hover sobre una tarjeta de producto pasa a 0 8 28.</li></ul></div></div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="g" id="iconos">
+      <h2><span class="n">06</span>Iconografía</h2>
+      <p class="lead">Iconos de trazo, con 24 px de lienzo, trazo de 2 y extremos redondeados (estilo Lucide). Toman el color con <code>currentColor</code>. Hay un icono por eje y otro por tipo de producto; un producto se identifica por la combinación de ambos.</p>
+      <div class="icons" id="icons"></div>
+    </section>
+
+    <!-- 7 -->
+    <section class="g" id="componentes">
+      <h2><span class="n">07</span>Componentes</h2>
+      <p class="lead">Cada componente se muestra con el mismo marcado que usa el prototipo. El acento (<code>--acc</code>) lo hereda del eje: azul verdoso en hidrología, azul en meteorología.</p>
+
+      <h3 class="sub">Botones</h3>
+      <div class="card"><div class="card-b">
+        <div class="demo"><button class="btn primary">Aplicar filtros</button><button class="btn">⬇ CSV</button><button class="btn">⬇ PDF</button><button class="btn">🔗 Compartir</button><button class="btn" disabled>Deshabilitado</button></div>
+        <ul class="spec-list"><li><b>Primario</b>: una sola acción principal por panel (aplicar, descargar el PDF oficial).</li><li><b>Secundario</b>: acciones de exportar y compartir, agrupadas en <code>.actions</code>.</li><li>Altura mínima de 34 px; en móvil, el área táctil llega a 44 px gracias al relleno del contenedor.</li></ul>
+      </div></div>
+
+      <h3 class="sub">Tarjeta de producto</h3>
+      <div class="grid g3" id="prod-demo"></div>
+      <ul class="spec-list"><li>Franja superior de 4 px con el color del eje, icono del tipo de producto y una cifra resumen en vivo.</li><li>Toda la tarjeta es un enlace a la vista del producto.</li></ul>
+
+      <h3 class="sub">Barra de avisos vigentes</h3>
+      <div class="alert-bar"><span class="ttl">⚠ 7 avisos vigentes</span><span class="chip lv-4">2 · Extrema</span><span class="chip lv-3">3 · Fuerte</span><span class="chip lv-2">2 · Moderada</span><a class="btn" href="#componentes">Ver todos los avisos →</a></div>
+      <ul class="spec-list"><li>Va siempre debajo de la cabecera de la home. Si no hay avisos, se muestra en estado neutro: «Sin avisos vigentes».</li></ul>
+
+      <div class="grid g2" style="margin-top:6px">
+        <div>
+          <h3 class="sub">KPI</h3>
+          <div class="grid g2">
+            <div class="kpi"><div class="v" style="color:var(--l4)">7</div><div class="l">avisos vigentes</div><div class="d" style="color:var(--l4)">▲ 2 vs. ayer</div></div>
+            <div class="kpi"><div class="v">96 %</div><div class="l">operatividad de la red</div><div class="d" style="color:var(--l1)">476 estaciones</div></div>
+          </div>
+          <ul class="spec-list"><li>Cifra, etiqueta y variación. La variación lleva flecha ▲▼ además de color.</li></ul>
+        </div>
+        <div>
+          <h3 class="sub">Navegación por producto</h3>
+          <div class="subnav" style="--acc:var(--hidro)"><a class="on" href="#componentes">Monitoreo</a><a href="#componentes">Pronóstico</a><a href="#componentes">Avisos</a></div>
+          <ul class="spec-list"><li>Permite saltar entre los tres tipos de producto de un mismo eje sin volver a la home.</li></ul>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:6px">
+        <div>
+          <h3 class="sub">Panel de filtros</h3>
+          <aside class="card" style="--acc:var(--meteo)"><div class="card-h"><h3>Filtros</h3><button class="btn" style="padding:4px 8px;font-size:12px">Limpiar</button></div>
+            <div class="card-b" style="display:flex;flex-direction:column;gap:14px">
+              <div class="field"><label class="t" for="f-reg">Región</label><select id="f-reg"><option>Todas las regiones</option><option>Puno</option><option>Cusco</option></select></div>
+              <div class="field"><label class="t">Variable</label><div class="seg"><button class="on">Temperatura</button><button>Precipitación</button><button>Viento</button></div></div>
+              <div class="field checks"><label class="t">Estado</label><label><input type="checkbox" checked> <span class="chip lv-4" style="font-size:11px">Crítico</span></label><label><input type="checkbox" checked> <span class="chip lv-3" style="font-size:11px">Alerta</span></label></div>
+              <button class="btn primary" style="justify-content:center">Aplicar filtros</button>
+            </div></aside>
+          <ul class="spec-list"><li>En el escritorio es una columna fija de 260 px; en móvil pasa debajo del mapa.</li><li>Usa control segmentado para hasta 4 opciones y select a partir de 5.</li></ul>
+        </div>
+        <div>
+          <h3 class="sub">Tarjeta de aviso</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;--acc:var(--meteo)">
+            <button class="aviso on" style="--lc:var(--l4)"><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip lv-4">▲ EXTREMA</span><span class="chip" style="background:var(--surface-2);border:1px solid var(--border)">Aviso 312</span></div><h4>Lluvias de fuerte intensidad en la selva norte</h4><small>Vigencia: 26/10 07:00 → 28/10 23:59 · Loreto, San Martín, Amazonas</small></button>
+            <button class="aviso" style="--lc:var(--l2)"><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip lv-2">▲ MODERADA</span><span class="chip" style="background:var(--surface-2);border:1px solid var(--border)">Aviso 309</span></div><h4>Incremento de viento en la costa</h4><small>Vigencia: 26/10 10:00 → 27/10 18:00 · Lima, Ica</small></button>
+          </div>
+          <ul class="spec-list"><li>Borde izquierdo de 6 px con el color del nivel, chip con el nivel, número de aviso, título, vigencia y zonas.</li><li>La tarjeta seleccionada lleva un contorno de 2 px con el acento del eje.</li></ul>
+        </div>
+      </div>
+
+      <h3 class="sub">Tabla de datos</h3>
+      <div class="card" style="--acc:var(--hidro);--acc-soft:var(--hidro-soft)"><div class="card-b" style="padding:0 8px 8px"><table class="tb">
+        <thead><tr><th>Estación</th><th class="num">Caudal (m³/s)</th><th class="num">Umbral</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td><b>Requena</b><br><span class="muted">Río Ucayali</span></td><td class="num">14 820,0</td><td class="num">13 500,0</td><td><span class="chip lv-4">Crítico</span></td></tr>
+          <tr><td><b>Chosica</b><br><span class="muted">Río Rímac</span></td><td class="num">96,4</td><td class="num">90,0</td><td><span class="chip lv-3">Alerta</span></td></tr>
+          <tr><td><b>Pisac</b><br><span class="muted">Río Vilcanota</span></td><td class="num">212,7</td><td class="num">260,0</td><td><span class="chip lv-1">Normal</span></td></tr>
+        </tbody></table></div></div>
+      <ul class="spec-list"><li>Cifras alineadas a la derecha con dígitos tabulares. Coma decimal y espacio como separador de miles (es-PE).</li><li>Por defecto se ordena por estado (lo más grave arriba). La fila seleccionada se sincroniza con el mapa.</li></ul>
+
+      <h3 class="sub">Línea de tiempo de pronóstico</h3>
+      <div class="card timeline" style="--acc:var(--hidro)"><button class="play" aria-label="Reproducir">▶</button><input type="range" min="0" max="72" step="6" value="24" aria-label="Horizonte de pronóstico"><b style="min-width:76px;text-align:right">+24 h</b></div>
+    </section>
+
+    <!-- 8 -->
+    <section class="g" id="datos">
+      <h2><span class="n">08</span>Mapas y gráficos</h2>
+      <p class="lead">El mapa es el lienzo principal de cada producto, y los gráficos complementan la estación o cuenca seleccionada.</p>
+      <div class="grid g2">
+        <div class="card"><div class="card-h"><h3>Mapa</h3></div><div class="card-b">
+          <svg viewBox="0 0 320 150" width="100%" role="img" aria-label="Ejemplo de estilos de mapa" style="background:var(--map-water);border-radius:10px">
+            <path d="M40 20 L150 14 L210 40 L250 30 L290 70 L260 120 L180 136 L110 128 L60 100 Z" fill="var(--map-land)" stroke="var(--map-stroke)" stroke-width="1.5"/>
+            <path d="M150 14 L170 80 L110 128" fill="none" stroke="var(--map-stroke)" stroke-width="1" stroke-dasharray="3 3"/>
+            <path d="M210 40 L250 30 L290 70 L230 80 Z" fill="var(--l3)" fill-opacity=".45" stroke="var(--l3)"/>
+            <circle cx="90" cy="60" r="6" fill="var(--l1)" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="130" cy="95" r="6" fill="var(--l2)" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="200" cy="100" r="8" fill="var(--l4)" stroke="var(--text)" stroke-width="2.5"/>
+          </svg>
+          <ul class="spec-list"><li>Estaciones: círculo de r 6 con borde blanco; la seleccionada pasa a r 8 con borde de 2,5 px del color del texto.</li><li>Zonas de aviso: relleno del nivel al 45 % y borde sólido.</li><li>Controles flotantes (capas, zoom, leyenda) sobre una superficie con sombra y radio de 10.</li></ul>
+          <div class="legend" style="margin-top:8px"><span><i style="background:var(--l4)"></i>Crítico</span><span><i style="background:var(--l3)"></i>Alerta</span><span><i style="background:var(--l2)"></i>Vigilancia</span><span><i style="background:var(--l1)"></i>Normal</span></div>
+        </div></div>
+        <div class="card"><div class="card-h"><h3>Serie temporal</h3></div><div class="card-b">
+          <svg viewBox="0 0 320 150" width="100%" role="img" aria-label="Ejemplo de serie con umbral y banda de pronóstico">
+            <g stroke="var(--border)"><line x1="30" y1="20" x2="310" y2="20"/><line x1="30" y1="60" x2="310" y2="60"/><line x1="30" y1="100" x2="310" y2="100"/><line x1="30" y1="130" x2="310" y2="130"/></g>
+            <path d="M180 70 L210 52 L240 40 L270 34 L300 30 L300 74 L270 72 L240 70 L210 74 L180 78 Z" fill="var(--hidro)" opacity=".15"/>
+            <line x1="30" y1="50" x2="310" y2="50" stroke="var(--l4)" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text x="306" y="45" text-anchor="end" font-size="10" fill="var(--l4)" font-weight="600">Umbral</text>
+            <polyline points="30,110 60,104 90,98 120,96 150,86 180,74" fill="none" stroke="var(--hidro)" stroke-width="2.5" stroke-linejoin="round"/>
+            <polyline points="180,74 210,63 240,55 270,53 300,52" fill="none" stroke="var(--hidro)" stroke-width="2.5" stroke-dasharray="5 4"/>
+            <line x1="180" y1="16" x2="180" y2="130" stroke="var(--muted)" stroke-width="1"/>
+            <text x="184" y="26" font-size="10" fill="var(--muted)">Ahora</text>
+            <g font-size="10" fill="var(--muted)"><text x="30" y="145">−72 h</text><text x="168" y="145">0</text><text x="282" y="145">+72 h</text></g>
+          </svg>
+          <ul class="spec-list"><li>Observado: línea continua de 2,5 px con el acento del eje. Pronóstico: la misma línea, discontinua.</li><li>Incertidumbre: banda del acento al 15 %. Umbral: línea discontinua del nivel, con etiqueta.</li><li>Rejilla horizontal de 1 px con el color del borde; sin rejilla vertical.</li></ul>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="g" id="grid">
+      <h2><span class="n">09</span>Grid y breakpoints</h2>
+      <p class="lead">El contenedor mide como máximo 1320 px y tiene un gutter de 16 px. La vista de producto usa tres columnas que se reorganizan según el ancho.</p>
+      <div class="card"><div class="card-b">
+        <div class="grid-vis" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="lay" style="grid-template-columns:2fr 5fr 3fr"><div>Filtros<br>260 px</div><div>Mapa<br>flexible</div><div>Detalle<br>360 px</div></div>
+      </div></div>
+      <div class="card bp-wrap" style="margin-top:16px"><table class="bp">
+        <thead><tr><th>Breakpoint</th><th>Home</th><th>Vista de producto</th><th>Navegación</th></tr></thead>
+        <tbody>
+          <tr><td><b>&gt; 1180 px</b></td><td>Mapa + resumen (1,6 : 1) · 3 tarjetas por fila</td><td>Filtros · mapa · detalle</td><td>Menú superior completo</td></tr>
+          <tr><td><b>≤ 1180 px</b></td><td>Igual</td><td>Filtros · mapa; el detalle baja a una grilla debajo</td><td>Igual</td></tr>
+          <tr><td><b>≤ 900 px</b></td><td>Mapa arriba y resumen debajo · 2 tarjetas por fila</td><td>Una columna: mapa, filtros y detalle</td><td>Igual · pie en 2 columnas</td></tr>
+          <tr><td><b>≤ 640 px</b></td><td>1 tarjeta por fila · mapa de 340 px sin panel de capas</td><td>Subnavegación con scroll horizontal</td><td>Menú con scroll horizontal · pie en 1 columna</td></tr>
+        </tbody></table></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="g" id="a11y">
+      <h2><span class="n">10</span>Accesibilidad</h2>
+      <p class="lead">Objetivo: WCAG 2.1 AA, el nivel exigido para sitios del Estado peruano.</p>
+      <div class="grid g2">
+        <div class="card"><div class="card-b"><ul class="spec-list" style="margin:0">
+          <li>Texto normal con contraste ≥ 4,5:1; texto grande y elementos gráficos con contraste ≥ 3:1.</li>
+          <li>El nivel de aviso siempre se comunica con texto, no solo con color.</li>
+          <li>Foco visible: contorno de 2 px <code>--brand-2</code> con 2 px de separación.</li>
+          <li>Los menús desplegables se abren también con el teclado (<code>:focus-within</code>).</li>
+        </ul></div></div>
+        <div class="card"><div class="card-b"><ul class="spec-list" style="margin:0">
+          <li>Los mapas y gráficos SVG llevan <code>role="img"</code> y una <code>aria-label</code> que resume el dato principal.</li>
+          <li>Toda la información del mapa existe también en la tabla, como alternativa accesible.</li>
+          <li>Botones con solo icono → <code>aria-label</code> («Cambiar tema», «Reproducir»).</li>
+          <li>El modo oscuro respeta la preferencia del sistema y se puede cambiar a mano.</li>
+        </ul></div></div>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="g" id="contenido">
+      <h2><span class="n">11</span>Contenido y formato</h2>
+      <p class="lead">Lenguaje claro y directo, pensado para ciudadanos y autoridades locales, no solo para especialistas.</p>
+      <div class="grid g3">
+        <div class="card"><div class="card-h"><h3>Números y unidades</h3></div><div class="card-b"><ul class="spec-list" style="margin:0"><li>Coma decimal: <b>12,5 °C</b></li><li>Miles con espacio: <b>14 820 m³/s</b></li><li>Espacio antes de la unidad, excepto en grados de ángulo</li><li>Negativos con signo menos real: <b>−6,4°</b></li></ul></div></div>
+        <div class="card"><div class="card-h"><h3>Fechas y horas</h3></div><div class="card-b"><ul class="spec-list" style="margin:0"><li>Formato <b>26/10 07:00</b> en listas y <b>26 de octubre de 2026, 07:00</b> en el detalle</li><li>Siempre en hora de Perú (UTC−5); indicarlo en la barra de estado</li><li>Horizonte relativo: <b>+24 h</b>, <b>+72 h</b></li></ul></div></div>
+        <div class="card"><div class="card-h"><h3>Tono</h3></div><div class="card-b"><ul class="spec-list" style="margin:0"><li>Títulos de aviso: fenómeno + intensidad + zona</li><li>Recomendaciones en imperativo: «Evite cruzar ríos crecidos»</li><li>Mostrar siempre la hora de la última actualización de los datos</li></ul></div></div>
+      </div>
+    </section>
+    <!-- 12 -->
+    <section class="g" id="mosaico">
+      <h2><span class="n">12</span>Mosaico</h2>
+      <p class="lead">Componentes de <code>mosaico-alta-fidelidad.html</code>: una sola página con los 6 productos y una vista ampliada por producto.</p>
+      <div class="grid g2">
+        <div class="card"><div class="card-h"><h3>Mosaico (tarjeta de producto)</h3></div><div class="card-b"><ul class="spec-list" style="margin:0">
+          <li>Franja superior de 4 px con el acento del eje; cabecera con icono, eje, nombre y botón «⤢ Ampliar».</li>
+          <li>Cuerpo de dos columnas: mini mapa del Perú (264 px de alto) y columna de información (cifra de 30 px, lista corta, leyenda). En ≤ 420 px se apilan.</li>
+          <li>Pie con la fuente y la hora del dato, con un punto verde que indica dato vigente.</li>
+          <li>Toda la tarjeta abre la vista ampliada; los selectores internos (variable, día) no la abren.</li>
+        </ul></div></div>
+        <div class="card"><div class="card-h"><h3>Mosaico ampliado</h3></div><div class="card-b"><ul class="spec-list" style="margin:0">
+          <li><code>&lt;dialog&gt;</code> a pantalla completa. Esc o ✕ lo cierran y devuelven el foco; el foco inicial va a ✕.</li>
+          <li>URL propia por producto (<code>#/meteo-avisos</code>); el botón atrás del navegador lo cierra.</li>
+          <li>Mapa fijo a la izquierda y panel de 440 px a la derecha; en ≤ 900 px el mapa queda arriba y el panel debajo.</li>
+          <li>En el panel va primero el detalle del elemento seleccionado y después las listas.</li>
+        </ul></div></div>
+      </div>
+      <h3 class="sub">Paletas de variables meteorológicas</h3>
+      <p class="muted" style="font-size:13px;margin:0 0 10px">Escalas secuenciales de 5 clases. La de temperatura evita el rojo y el naranja saturados para no confundirse con los niveles de aviso.</p>
+      <div class="grid g2" id="var-ramps"></div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const ICON={
+  hidro:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7S6 9.3 6 14a6 6 0 0 0 12 0c0-4.7-6-11.3-6-11.3z"/></svg>',
+  meteo:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H8a5 5 0 1 1 1.6-9.7A6 6 0 0 1 21 12.5 3.5 3.5 0 0 1 17.5 19z"/></svg>',
+  mon:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  pro:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/><path d="M16 8h4v4"/></svg>',
+  avi:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
+};
+
+/* ---------- swatches ---------- */
+const SW={
+  "sw-brand":[["--brand","Marca","Cabecera, pie"],["--brand-2","Marca interactiva","Botón primario, foco, enlaces"],["--brand-ink","Texto sobre marca","Texto en la cabecera"],["--brand-soft","Marca suave","Fondos de selección"]],
+  "sw-dom":[["--hidro","Hidrología","Acento de los 3 productos hidro"],["--hidro-soft","Hidrología suave","Fondo de icono, fila seleccionada"],["--meteo","Meteorología","Acento de los 3 productos meteo"],["--meteo-soft","Meteorología suave","Fondo de icono, fila seleccionada"]],
+  "sw-neutral":[["--bg","Fondo","Lienzo de página"],["--surface","Superficie","Tarjetas, menús"],["--surface-2","Superficie 2","Campos, KPIs, hover"],["--border","Borde","Divisores, contornos"],["--text","Texto","Texto principal"],["--muted","Texto secundario","Descripciones, metadatos"]],
+  "sw-map":[["--map-water","Agua / fondo","Fondo del mapa"],["--map-land","Tierra","Relleno de regiones"],["--map-stroke","Límites","Bordes de regiones"]]
+};
+const tok=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function renderSwatches(){
+  for(const[id,list]of Object.entries(SW)){
+    $("#"+id).innerHTML=list.map(([v,n,u])=>`<button class="sw" data-copy="${tok(v)}" aria-label="Copiar ${n} ${tok(v)}"><div class="c" style="background:var(${v})"></div><div class="i"><b>${n}</b><span>${v} · ${tok(v)}</span><em>${u}</em></div></button>`).join("");
+  }
+}
+
+/* ---------- contraste ---------- */
+function lum(hex){const c=hex.replace("#","");const rgb=[0,2,4].map(i=>parseInt(c.substr(i,2),16)/255).map(x=>x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4));return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}
+const ratio=(a,b)=>{const[l1,l2]=[lum(a),lum(b)].sort((x,y)=>y-x);return(l1+.05)/(l2+.05)};
+const LVS=[
+  [4,"▲ EXTREMA","Extrema","Peligro muy alto; acción inmediata","#ffffff"],
+  [3,"▲ FUERTE","Fuerte","Peligro alto; prepararse","#1b1b1b"],
+  [2,"▲ MODERADA","Moderada","Peligro moderado; mantenerse informado","#1b1b1b"],
+  [1,"Normal","Normal","Sin peligro / dentro de rangos","#ffffff"],
+  [0,"Sin dato","Sin dato","Estación sin transmisión","#ffffff"]
+];
+const FIX={1:"#22834a",0:"#6b7785"};
+function renderLevels(){
+  const fails=[];
+  $("#lv-rows").innerHTML=LVS.map(([l,a,s,u,ink])=>{const bg=tok("--l"+l);const r=ratio(bg,ink);const ok=r>=4.5;if(!ok)fails.push([l,bg,r]);
+    return`<tr><td><code>--l${l}</code><br><span class="muted" style="font-size:12px">${bg}</span></td><td><span class="chip lv-${l}">${a}</span></td><td><span class="chip lv-${l}">${s}</span></td><td class="hide-m muted">${u}</td><td><span class="ratio ${ok?"ok":"bad"}">${r.toFixed(2)}:1 ${ok?"✓ AA":"✗ < 4,5"}</span></td></tr>`}).join("");
+  $("#lv-note").innerHTML=fails.length?`<b class="bad">Pendiente:</b> ${fails.map(([l,bg,r])=>`<code>--l${l}</code> (${bg}, ${r.toFixed(2)}:1)`).join(" y ")} no llegan a 4,5:1 con texto blanco de 12 px. Propuesta: ${fails.map(([l])=>FIX[l]?`<code>--l${l}: ${FIX[l]}</code> (${ratio(FIX[l],"#ffffff").toFixed(2)}:1)`:"").filter(Boolean).join(" y ")}, con el mismo tono y menos luminosidad. Los colores oficiales de la escala de avisos los debe validar el SENAMHI.`:"Todos los chips cumplen AA. En la v0.1 se oscurecieron <code>--l1</code> (antes #2e9e5b, 3,42:1) y <code>--l0</code> (antes #9aa7b5, 2,4:1). Los colores oficiales de la escala de avisos los debe validar el SENAMHI.";
+}
+
+/* ---------- iconos y tarjetas ---------- */
+$("#icons").innerHTML=[["hidro","Hidrología","eje"],["meteo","Meteorología","eje"],["mon","Monitoreo","tipo"],["pro","Pronóstico","tipo"],["avi","Avisos","tipo"]].map(([k,n,t])=>`<div class="card" style="color:var(--${t==="eje"?k:"brand-2"})">${ICON[k]}<span>${n}</span><small class="muted">${t}</small></div>`).join("");
+$("#prod-demo").innerHTML=[
+  ["hidro","mon","Monitoreo hidrológico","Caudales y niveles de los principales ríos en tiempo casi real.","3","ríos sobre umbral de alerta"],
+  ["meteo","pro","Pronósticos meteorológicos","Pronóstico del tiempo a 72 h por ciudad.","24","capitales con pronóstico"],
+  ["meteo","avi","Avisos meteorológicos","Lluvias, heladas, friaje, vientos y calor.","5","avisos vigentes"]
+].map(([d,t,n,s,v,l])=>`<a class="card prod" href="mosaico-alta-fidelidad.html#/${d}-${t==="mon"?"monitoreo":t==="pro"?"pronostico":"avisos"}" style="--acc:var(--${d});--acc-soft:var(--${d}-soft)"><div class="ic">${ICON[t]}</div><div><div class="eyebrow">${d==="hidro"?"Hidrología":"Meteorología"}</div><h3>${n}</h3></div><p>${s}</p><div class="stat"><b>${v}</b><span class="muted" style="font-size:12.5px">${l}</span><span class="go">Ver →</span></div></a>`).join("");
+
+/* ---------- paletas de variables (idénticas a VARS en mosaico-alta-fidelidad.html) ---------- */
+$("#var-ramps").innerHTML=[
+  ["Temperatura","°C",["#4a6fb5","#9cc3e4","#e3eef2","#f7dc9a","#f0a98f"],["<5","5–12","12–20","20–27",">27"]],
+  ["Humedad relativa","%",["#f1eef6","#bdc9e1","#74a9cf","#2b8cbe","#045a8d"],["<40","40–60","60–75","75–90",">90"]],
+  ["Precipitación","mm",["#f7fcf0","#bae4bc","#7bccc4","#43a2ca","#0868ac"],["0","<2","2–5","5–10",">10"]],
+  ["Viento","km/h",["#f2f0f7","#cbc9e2","#9e9ac8","#756bb1","#54278f"],["<5","5–10","10–15","15–25",">25"]]
+].map(([n,u,c,l])=>`<div class="card"><div class="card-b"><b style="font-size:13px">${n} <span class="muted">(${u})</span></b>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px">${c.map((x,i)=>`<button class="sw" data-copy="${x}" aria-label="Copiar ${x}"><div class="c" style="height:28px;background:${x}"></div><div class="i" style="padding:4px 6px"><span>${l[i]}</span></div></button>`).join("")}</div></div></div>`).join("");
+
+/* ---------- interacción ---------- */
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),1400)}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const v=b.dataset.copy;
+  (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast("Copiado "+v),()=>toast(v))});
+document.querySelectorAll(".seg").forEach(g=>g.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;g.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))}));
+function render(){renderSwatches();renderLevels()}
+$("#theme").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=dark?"light":"dark";
+  try{localStorage.setItem("pc-theme",r.dataset.theme)}catch(e){}render()};
+try{const t=localStorage.getItem("pc-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",render);
+render();
+
+/* toc activo */
+const links=[...document.querySelectorAll(".toc a")];
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id))}),{rootMargin:"-30% 0px -60% 0px"});
+document.querySelectorAll("section.g").forEach(s=>io.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Portal de Contingencia del SENAMHI: monitoreo, pronósticos y avisos hidrológicos y meteorológicos.">
+<meta name="theme-color" content="#002259">
+<title>Portal de Contingencia · SENAMHI</title>
+<link rel="stylesheet" href="css/portal.css">
+<!-- Carga del módulo en paralelo con la hoja de estilos -->
+<link rel="modulepreload" href="js/app.js">
+</head>
+<body>
+<div class="demo" id="demo" hidden>REPOSITORIO DE DEMOSTRACIÓN · Los productos mostrados son datos de ejemplo</div>
+<header class="main">
+  <div class="container">
+    <div class="logos"><div class="logo-ph" aria-label="Espacio para logo Perú · Ministerio del Ambiente">PERÚ · MINISTERIO<br>DEL AMBIENTE</div><div class="logo-ph" aria-label="Espacio para logo SENAMHI">LOGO<br>SENAMHI</div></div>
+    <a class="brand-txt" href="#/"><b>Portal de Contingencia</b><span>Servicio Nacional de Meteorología e Hidrología del Perú · canal alterno</span></a>
+    <div class="hd-r">
+      <span class="mode" title="El portal opera como canal alterno de difusión">● <span>MODO CONTINGENCIA</span></span>
+      <div class="clock" id="clock" aria-live="off"></div>
+      <button class="icon-btn" id="theme" title="Cambiar tema" aria-label="Cambiar tema claro/oscuro">◐</button>
+    </div>
+  </div>
+</header>
+<nav class="top" aria-label="Principal"><div class="container">
+  <button class="pill on" data-go="top">Mosaico</button>
+  <div class="nav-item" style="--acc:var(--hidro)"><button class="pill" aria-haspopup="true">Hidrología ▾</button><div class="menu">
+    <button data-open="hidro-monitoreo"><span>●</span>Monitoreo hidrológico</button><button data-open="hidro-pronostico"><span>●</span>Pronóstico hidrológico</button><button data-open="hidro-avisos"><span>●</span>Avisos hidrológicos</button></div></div>
+  <div class="nav-item" style="--acc:var(--meteo)"><button class="pill" aria-haspopup="true">Meteorología ▾</button><div class="menu">
+    <button data-open="meteo-monitoreo"><span>●</span>Monitoreo meteorológico</button><button data-open="meteo-pronostico"><span>●</span>Pronóstico meteorológico</button><button data-open="meteo-avisos"><span>●</span>Avisos meteorológicos</button></div></div>
+  <button class="pill alert" id="nav-av" hidden></button>
+</div></nav>
+<div class="banner" id="banner" role="status" aria-live="polite" hidden></div>
+
+<main class="container" id="top">
+  <h1 class="sr-only">Portal de Contingencia: mosaico de productos hidrometeorológicos</h1>
+  <div class="bento" id="bento"></div>
+  <noscript><p>El portal necesita JavaScript para mostrar los productos.</p></noscript>
+</main>
+<footer><div class="container"><span><b style="color:#fff">Portal de Contingencia</b> · © 2026 SENAMHI · Servicio Nacional de Meteorología e Hidrología del Perú</span><span id="contacto"></span><span>v1.0 · contrato de datos 1.0</span></div></footer>
+
+<dialog class="dlg" id="dlg" aria-labelledby="dlg-t"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

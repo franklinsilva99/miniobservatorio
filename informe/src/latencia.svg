@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" font-family="Segoe UI, Arial, sans-serif">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#002259"/></marker></defs>
+  <rect width="1200" height="420" fill="#fff"/>
+  <rect width="1200" height="6" fill="#FFC600"/>
+  <text x="40" y="46" font-size="22" font-weight="700" fill="#002259">Actualidad de los datos: cuánto tarda un dato en verse</text>
+  <text x="40" y="70" font-size="13.5" fill="#5b6b7d">Objetivo acordado: monitoreo cada 10 min · el portal detecta lo publicado en 60 s como máximo</text>
+
+  <line x1="60" y1="190" x2="1140" y2="190" stroke="#002259" stroke-width="3" marker-end="url(#a)"/>
+  <g font-size="13" text-anchor="middle">
+    <circle cx="110" cy="190" r="10" fill="#0047BA"/><text x="110" y="226" font-weight="700" fill="#14212f">Estación mide</text><text x="110" y="244" fill="#5b6b7d">y transmite</text>
+    <circle cx="380" cy="190" r="10" fill="#0047BA"/><text x="380" y="226" font-weight="700" fill="#14212f">Sistema productor</text><text x="380" y="244" fill="#5b6b7d">genera el producto</text>
+    <circle cx="640" cy="190" r="10" fill="#0e7c86"/><text x="640" y="226" font-weight="700" fill="#14212f">Publica en el</text><text x="640" y="244" fill="#5b6b7d">repositorio (segundos)</text>
+    <circle cx="1040" cy="190" r="12" fill="#22834a"/><text x="1040" y="226" font-weight="700" fill="#14212f">Visible en el portal</text><text x="1040" y="244" fill="#5b6b7d">para el ciudadano</text>
+  </g>
+  <g font-size="13" font-weight="700" text-anchor="middle">
+    <rect x="120" y="120" width="510" height="40" rx="8" fill="#e6eefb" stroke="#0047BA"/><text x="375" y="145" fill="#0047BA">Ciclo de emisión del productor: cada 10 min</text>
+    <rect x="652" y="120" width="380" height="40" rx="8" fill="#e8f5ec" stroke="#22834a"/><text x="842" y="145" fill="#22834a">Detección del portal: ≤ 60 s</text>
+  </g>
+  <rect x="60" y="290" width="1080" height="96" rx="12" fill="#f3f6fa" stroke="#dde4ee"/>
+  <g font-size="14" fill="#14212f">
+    <text x="84" y="322"><tspan font-weight="700">Resultado:</tspan> un producto publicado aparece en el portal en 1 minuto como máximo, y la información en pantalla</text>
+    <text x="84" y="344">nunca tiene más de ~11 minutos de antigüedad (10 min de ciclo + 1 min de detección), si el productor cumple su ciclo.</text>
+    <text x="84" y="370" fill="#5b6b7d">Si no llega una emisión, el producto se marca «desactualizado» al superar 20 min (2 × frecuencia), sin dejar de mostrarse.</text>
+  </g>
+</svg>

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" font-family="Segoe UI, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Arquitectura del Portal de Contingencia</title>
+  <desc id="d">Los sistemas productores validan y publican archivos JSON en un repositorio independiente; el portal los lee cada 60 segundos, los valida y guarda la última versión válida en el navegador.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#002259"/></marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0e7c86"/></marker>
+  </defs>
+  <rect width="1200" height="640" fill="#ffffff"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#FFC600"/>
+  <text x="40" y="48" font-size="22" font-weight="700" fill="#002259">Portal de Contingencia · recepción de productos por archivos estáticos</text>
+  <text x="40" y="74" font-size="14" fill="#5b6b7d">El portal no genera productos: los recibe, los valida y los muestra. Si un sistema cae, se sigue mostrando la última versión válida.</text>
+
+  <!-- columnas -->
+  <g font-size="12" font-weight="700" fill="#5b6b7d" letter-spacing="1">
+    <text x="40" y="118">1 · SISTEMAS PRODUCTORES (EXISTENTES)</text>
+    <text x="440" y="118">2 · REPOSITORIO DE PRODUCTOS</text>
+    <text x="840" y="118">3 · PORTAL DE CONTINGENCIA</text>
+  </g>
+
+  <!-- productores -->
+  <g>
+    <rect x="40" y="134" width="320" height="150" rx="12" fill="#e6eefb" stroke="#0047BA" stroke-width="1.5"/>
+    <text x="60" y="164" font-size="16" font-weight="700" fill="#0047BA">Sistema meteorológico</text>
+    <text x="60" y="190" font-size="13" fill="#14212f">· Monitoreo (estaciones automáticas)</text>
+    <text x="60" y="210" font-size="13" fill="#14212f">· Pronóstico por ciudades</text>
+    <text x="60" y="230" font-size="13" fill="#14212f">· Avisos meteorológicos</text>
+    <text x="60" y="262" font-size="12" fill="#5b6b7d">Valida con el contrato y publica</text>
+
+    <rect x="40" y="304" width="320" height="150" rx="12" fill="#e3f4f5" stroke="#0e7c86" stroke-width="1.5"/>
+    <text x="60" y="334" font-size="16" font-weight="700" fill="#0e7c86">Sistema hidrológico</text>
+    <text x="60" y="360" font-size="13" fill="#14212f">· Monitoreo (caudal y nivel)</text>
+    <text x="60" y="380" font-size="13" fill="#14212f">· Pronóstico (modelos)</text>
+    <text x="60" y="400" font-size="13" fill="#14212f">· Avisos por avenida y vaciante</text>
+    <text x="60" y="432" font-size="12" fill="#5b6b7d">Valida con el contrato y publica</text>
+  </g>
+
+  <!-- repositorio -->
+  <g>
+    <rect x="440" y="134" width="320" height="320" rx="12" fill="#f7f9fc" stroke="#9fb3c8" stroke-width="1.5"/>
+    <text x="460" y="164" font-size="16" font-weight="700" fill="#002259">Servidor web independiente</text>
+    <text x="460" y="184" font-size="12" fill="#5b6b7d">Fuera de la infraestructura principal</text>
+    <g font-family="Consolas, monospace" font-size="13" fill="#14212f">
+      <rect x="460" y="200" width="280" height="30" rx="6" fill="#FFC600" fill-opacity=".25" stroke="#c99a00"/>
+      <text x="472" y="220" font-weight="700">manifest.json</text>
+      <text x="606" y="220" font-family="Segoe UI, Arial" font-size="11" fill="#5c4400">qué hay y cuándo</text>
+      <text x="472" y="256">meteo/monitoreo.json</text>
+      <text x="472" y="278">meteo/pronostico.json</text>
+      <text x="472" y="300">meteo/avisos.json</text>
+      <text x="472" y="326">hidro/monitoreo.json</text>
+      <text x="472" y="348">hidro/pronostico.json</text>
+      <text x="472" y="370">hidro/avisos.json</text>
+      <text x="472" y="396" fill="#5b6b7d">avisos/*.pdf (opcional)</text>
+    </g>
+    <text x="460" y="432" font-size="12" fill="#5b6b7d">Archivo temporal + renombrar = publicación atómica</text>
+  </g>
+
+  <!-- portal -->
+  <g>
+    <rect x="840" y="134" width="320" height="200" rx="12" fill="#002259"/>
+    <text x="860" y="164" font-size="16" font-weight="700" fill="#ffffff">Frontend estático</text>
+    <text x="860" y="184" font-size="12" fill="#c9d7ee">HTML + CSS + JS · sin frameworks · ~150 KB</text>
+    <g font-size="13" fill="#ffffff">
+      <text x="860" y="214">1. Lee manifest.json cada 60 s</text>
+      <text x="860" y="236">2. Descarga solo lo que cambió</text>
+      <text x="860" y="258">3. Valida contra el contrato 1.0</text>
+      <text x="860" y="280">4. Dibuja el mosaico de 6 productos</text>
+      <text x="860" y="302">5. Si un archivo es inválido, lo rechaza</text>
+      <text x="876" y="320" fill="#c9d7ee">y conserva la versión anterior</text>
+    </g>
+    <rect x="840" y="354" width="320" height="100" rx="12" fill="#ffffff" stroke="#002259" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="860" y="384" font-size="15" font-weight="700" fill="#002259">Copia local en el navegador</text>
+    <text x="860" y="406" font-size="13" fill="#14212f">Última versión válida de cada producto:</text>
+    <text x="860" y="426" font-size="13" fill="#14212f">se muestra al instante y sin conexión</text>
+  </g>
+
+  <!-- flechas -->
+  <path d="M360 209 H430" stroke="#002259" stroke-width="2.5" fill="none" marker-end="url(#a)"/>
+  <path d="M360 379 H430" stroke="#002259" stroke-width="2.5" fill="none" marker-end="url(#a)"/>
+  <text x="372" y="200" font-size="11" fill="#002259" font-weight="600">publica</text>
+  <text x="372" y="370" font-size="11" fill="#002259" font-weight="600">publica</text>
+  <path d="M830 234 H770" stroke="#0e7c86" stroke-width="2.5" fill="none" marker-end="url(#ar)"/>
+  <text x="776" y="226" font-size="11" fill="#0e7c86" font-weight="600">GET</text>
+  <path d="M1000 334 V346" stroke="#002259" stroke-width="2.5" fill="none" marker-end="url(#a)"/>
+
+  <!-- franja de estados -->
+  <rect x="40" y="484" width="1120" height="124" rx="12" fill="#f3f6fa" stroke="#dde4ee"/>
+  <text x="60" y="512" font-size="14" font-weight="700" fill="#002259">Estado visible de cada producto en el portal</text>
+  <g font-size="13" fill="#14212f">
+    <circle cx="66" cy="540" r="6" fill="#22834a"/><text x="80" y="545"><tspan font-weight="700">Al día</tspan> · llegó la emisión esperada</text>
+    <circle cx="66" cy="570" r="6" fill="#6b7785"/><text x="80" y="575"><tspan font-weight="700">No disponible</tspan> · nunca llegó una versión válida</text>
+    <circle cx="436" cy="540" r="6" fill="#f08c1a"/><text x="450" y="545"><tspan font-weight="700">Desactualizado</tspan> · supera 2 × su frecuencia</text>
+    <circle cx="436" cy="570" r="6" fill="#f08c1a"/><text x="450" y="575"><tspan font-weight="700">Sin conexión</tspan> · se muestra la última recibida</text>
+    <circle cx="806" cy="540" r="6" fill="#d93a2b"/><text x="820" y="545"><tspan font-weight="700">Rechazado</tspan> · no cumple el contrato</text>
+    <text x="820" y="575" fill="#5b6b7d">Cada producto es independiente:</text>
+    <text x="820" y="595" fill="#5b6b7d">si falla uno, los otros cinco siguen.</text>
+  </g>
+</svg>

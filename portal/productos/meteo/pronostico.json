@@ -1,0 +1,615 @@
+{
+  "contrato": "1.0",
+  "producto": "meteo-pronostico",
+  "emitido": "2026-11-02T05:00:00-05:00",
+  "fuente": "SENAMHI · Dirección de Meteorología (pronóstico por ciudades)",
+  "datos": {
+    "fechas": [
+      "2026-11-02",
+      "2026-11-03",
+      "2026-11-04"
+    ],
+    "ciudades": [
+      {
+        "departamento": "Amazonas",
+        "ciudad": "Chachapoyas",
+        "dias": [
+          {
+            "tmax": 23,
+            "tmin": 12,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          },
+          {
+            "tmax": 22,
+            "tmin": 12,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 22,
+            "tmin": 13,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Áncash",
+        "ciudad": "Huaraz",
+        "dias": [
+          {
+            "tmax": 23,
+            "tmin": 7,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 22,
+            "tmin": 7,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          },
+          {
+            "tmax": 24,
+            "tmin": 6,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          }
+        ]
+      },
+      {
+        "departamento": "Apurímac",
+        "ciudad": "Abancay",
+        "dias": [
+          {
+            "tmax": 26,
+            "tmin": 11,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 25,
+            "tmin": 11,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 26,
+            "tmin": 11,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Arequipa",
+        "ciudad": "Arequipa",
+        "dias": [
+          {
+            "tmax": 25,
+            "tmin": 9,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          },
+          {
+            "tmax": 24,
+            "tmin": 10,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 25,
+            "tmin": 8,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          }
+        ]
+      },
+      {
+        "departamento": "Ayacucho",
+        "ciudad": "Ayacucho",
+        "dias": [
+          {
+            "tmax": 25,
+            "tmin": 9,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 24,
+            "tmin": 10,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 24,
+            "tmin": 9,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Cajamarca",
+        "ciudad": "Cajamarca",
+        "dias": [
+          {
+            "tmax": 22,
+            "tmin": 8,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          },
+          {
+            "tmax": 21,
+            "tmin": 7,
+            "cielo": "lluvia_moderada",
+            "descripcion": "Cielo cubierto con lluvia moderada por la tarde."
+          },
+          {
+            "tmax": 23,
+            "tmin": 7,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Callao",
+        "ciudad": "Callao",
+        "dias": [
+          {
+            "tmax": 20,
+            "tmin": 16,
+            "cielo": "cubierto",
+            "descripcion": "Cielo cubierto variando a nublado parcial."
+          },
+          {
+            "tmax": 19,
+            "tmin": 15,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 21,
+            "tmin": 16,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          }
+        ]
+      },
+      {
+        "departamento": "Cusco",
+        "ciudad": "Cusco",
+        "dias": [
+          {
+            "tmax": 22,
+            "tmin": 4,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 21,
+            "tmin": 4,
+            "cielo": "tormenta",
+            "descripcion": "Chubascos con descargas eléctricas por la tarde."
+          },
+          {
+            "tmax": 22,
+            "tmin": 5,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Huancavelica",
+        "ciudad": "Huancavelica",
+        "dias": [
+          {
+            "tmax": 17,
+            "tmin": 1,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          },
+          {
+            "tmax": 16,
+            "tmin": 1,
+            "cielo": "nevada",
+            "descripcion": "Cielo nublado con nevada ligera en zonas altas por la noche."
+          },
+          {
+            "tmax": 16,
+            "tmin": 1,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Huánuco",
+        "ciudad": "Huánuco",
+        "dias": [
+          {
+            "tmax": 28,
+            "tmin": 14,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 27,
+            "tmin": 14,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 29,
+            "tmin": 15,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Ica",
+        "ciudad": "Ica",
+        "dias": [
+          {
+            "tmax": 30,
+            "tmin": 15,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          },
+          {
+            "tmax": 29,
+            "tmin": 15,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          },
+          {
+            "tmax": 31,
+            "tmin": 15,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Junín",
+        "ciudad": "Huancayo",
+        "dias": [
+          {
+            "tmax": 21,
+            "tmin": 3,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 20,
+            "tmin": 4,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          },
+          {
+            "tmax": 21,
+            "tmin": 4,
+            "cielo": "tormenta",
+            "descripcion": "Chubascos con descargas eléctricas por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "La Libertad",
+        "ciudad": "Trujillo",
+        "dias": [
+          {
+            "tmax": 24,
+            "tmin": 17,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 23,
+            "tmin": 18,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 23,
+            "tmin": 17,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Lambayeque",
+        "ciudad": "Chiclayo",
+        "dias": [
+          {
+            "tmax": 28,
+            "tmin": 18,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 27,
+            "tmin": 17,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 29,
+            "tmin": 18,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          }
+        ]
+      },
+      {
+        "departamento": "Lima",
+        "ciudad": "Lima",
+        "dias": [
+          {
+            "tmax": 21,
+            "tmin": 16,
+            "cielo": "cubierto",
+            "descripcion": "Cielo cubierto variando a nublado parcial."
+          },
+          {
+            "tmax": 20,
+            "tmin": 15,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 22,
+            "tmin": 15,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          }
+        ]
+      },
+      {
+        "departamento": "Loreto",
+        "ciudad": "Iquitos",
+        "dias": [
+          {
+            "tmax": 33,
+            "tmin": 23,
+            "cielo": "tormenta",
+            "descripcion": "Chubascos con descargas eléctricas por la tarde."
+          },
+          {
+            "tmax": 32,
+            "tmin": 23,
+            "cielo": "lluvia_moderada",
+            "descripcion": "Cielo cubierto con lluvia moderada por la tarde."
+          },
+          {
+            "tmax": 33,
+            "tmin": 23,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Madre de Dios",
+        "ciudad": "Puerto Maldonado",
+        "dias": [
+          {
+            "tmax": 34,
+            "tmin": 22,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 33,
+            "tmin": 22,
+            "cielo": "tormenta",
+            "descripcion": "Chubascos con descargas eléctricas por la tarde."
+          },
+          {
+            "tmax": 33,
+            "tmin": 21,
+            "cielo": "lluvia_moderada",
+            "descripcion": "Cielo cubierto con lluvia moderada por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Moquegua",
+        "ciudad": "Moquegua",
+        "dias": [
+          {
+            "tmax": 28,
+            "tmin": 12,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          },
+          {
+            "tmax": 27,
+            "tmin": 12,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          },
+          {
+            "tmax": 29,
+            "tmin": 12,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Pasco",
+        "ciudad": "Cerro de Pasco",
+        "dias": [
+          {
+            "tmax": 12,
+            "tmin": -3,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          },
+          {
+            "tmax": 11,
+            "tmin": -2,
+            "cielo": "nevada",
+            "descripcion": "Cielo nublado con nevada ligera en zonas altas por la noche."
+          },
+          {
+            "tmax": 13,
+            "tmin": -4,
+            "cielo": "nevada",
+            "descripcion": "Cielo nublado con nevada ligera en zonas altas por la noche."
+          }
+        ]
+      },
+      {
+        "departamento": "Piura",
+        "ciudad": "Piura",
+        "dias": [
+          {
+            "tmax": 33,
+            "tmin": 21,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 32,
+            "tmin": 22,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          },
+          {
+            "tmax": 33,
+            "tmin": 21,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Puno",
+        "ciudad": "Puno",
+        "dias": [
+          {
+            "tmax": 15,
+            "tmin": -4,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 14,
+            "tmin": -5,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          },
+          {
+            "tmax": 14,
+            "tmin": -3,
+            "cielo": "nevada",
+            "descripcion": "Cielo nublado con nevada ligera en zonas altas por la noche."
+          }
+        ]
+      },
+      {
+        "departamento": "San Martín",
+        "ciudad": "Moyobamba",
+        "dias": [
+          {
+            "tmax": 30,
+            "tmin": 18,
+            "cielo": "lluvia_moderada",
+            "descripcion": "Cielo cubierto con lluvia moderada por la tarde."
+          },
+          {
+            "tmax": 29,
+            "tmin": 17,
+            "cielo": "tormenta",
+            "descripcion": "Chubascos con descargas eléctricas por la tarde."
+          },
+          {
+            "tmax": 32,
+            "tmin": 18,
+            "cielo": "lluvia_ligera",
+            "descripcion": "Cielo nublado parcial con lluvia ligera por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Tacna",
+        "ciudad": "Tacna",
+        "dias": [
+          {
+            "tmax": 26,
+            "tmin": 12,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          },
+          {
+            "tmax": 25,
+            "tmin": 12,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 27,
+            "tmin": 13,
+            "cielo": "despejado",
+            "descripcion": "Cielo despejado."
+          }
+        ]
+      },
+      {
+        "departamento": "Tumbes",
+        "ciudad": "Tumbes",
+        "dias": [
+          {
+            "tmax": 32,
+            "tmin": 23,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          },
+          {
+            "tmax": 31,
+            "tmin": 23,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 32,
+            "tmin": 23,
+            "cielo": "nubes_dispersas",
+            "descripcion": "Cielo con nubes dispersas variando a cielo despejado por la tarde."
+          }
+        ]
+      },
+      {
+        "departamento": "Ucayali",
+        "ciudad": "Pucallpa",
+        "dias": [
+          {
+            "tmax": 34,
+            "tmin": 22,
+            "cielo": "nublado_parcial",
+            "descripcion": "Cielo nublado parcial con brillo solar hacia el mediodía."
+          },
+          {
+            "tmax": 33,
+            "tmin": 22,
+            "cielo": "tormenta",
+            "descripcion": "Chubascos con descargas eléctricas por la tarde."
+          },
+          {
+            "tmax": 33,
+            "tmin": 23,
+            "cielo": "lluvia_moderada",
+            "descripcion": "Cielo cubierto con lluvia moderada por la tarde."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mosaico de Contingencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Tokens idénticos a guia-ui.html — mantener sincronizados */
+  :root{
+    --brand:#002259; --brand-2:#0047BA; --brand-ink:#ffffff; --brand-soft:#e6eefb; --sun:#FFC600;
+    --hidro:#0e7c86; --hidro-soft:#e3f4f5; --meteo:#0047BA; --meteo-soft:#e6eefb;
+    --bg:#f3f6fa; --surface:#ffffff; --surface-2:#f7f9fc; --border:#dde4ee; --text:#14212f; --muted:#5b6b7d;
+    --map-land:#dfe8f2; --map-stroke:#9fb3c8; --map-water:#eaf2fa;
+    --l1:#22834a; --l2:#f2c200; --l3:#f08c1a; --l4:#d93a2b; --l0:#6b7785;
+    --pt-stroke:#0b2545;
+    --shadow:0 1px 2px rgba(16,33,55,.06),0 4px 16px rgba(16,33,55,.06);
+    --r:12px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --brand:#001a44; --brand-2:#6d9cff; --brand-soft:#15233f;
+      --hidro:#3fb8c2; --hidro-soft:#12303a; --meteo:#7aa2ff; --meteo-soft:#172a48;
+      --bg:#0d1520; --surface:#141f2d; --surface-2:#192637; --border:#26364a; --text:#e6edf5; --muted:#93a4b8;
+      --map-land:#1f3045; --map-stroke:#3c5470; --map-water:#101b28;
+      --pt-stroke:#e6edf5;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"]{
+    --brand:#001a44; --brand-2:#6d9cff; --brand-soft:#15233f;
+    --hidro:#3fb8c2; --hidro-soft:#12303a; --meteo:#7aa2ff; --meteo-soft:#172a48;
+    --bg:#0d1520; --surface:#141f2d; --surface-2:#192637; --border:#26364a; --text:#e6edf5; --muted:#93a4b8;
+    --map-land:#1f3045; --map-stroke:#3c5470; --map-water:#101b28;
+    --pt-stroke:#e6edf5;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit}
+  svg{display:block}
+  .container{max-width:1320px;margin:0 auto;padding:0 16px}
+
+  /* ---------- cabecera (estructura del Observatorio, identidad SENAMHI: azul #0047BA, marino #002259, sol #FFC600) ---------- */
+  .proto{background:repeating-linear-gradient(45deg,#fff3cd,#fff3cd 10px,#ffeaa6 10px,#ffeaa6 20px);color:#5c4400;text-align:center;font-size:12px;font-weight:600;padding:4px 16px}
+  header.main{background:var(--surface);border-bottom:3px solid var(--sun)}
+  header.main .container{display:flex;align-items:center;gap:16px;min-height:76px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+  .logos{display:flex;align-items:center;gap:14px;padding-right:16px;border-right:1px solid var(--border)}
+  .logo-ph{height:40px;border-radius:6px;border:2px dashed var(--map-stroke);display:grid;place-items:center;font-size:9.5px;font-weight:700;letter-spacing:.04em;color:var(--muted);padding:0 10px;text-align:center;line-height:1.15}
+  .brand-txt b{display:block;font-size:15px;color:var(--brand-2);text-transform:uppercase;letter-spacing:.01em}
+  .brand-txt span{font-size:12.5px;color:var(--muted)}
+  .hd-r{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .mode{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--l1);background:color-mix(in srgb,var(--l1) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--l1) 40%,var(--border));padding:5px 10px;border-radius:999px}
+  .clock{text-align:right;line-height:1.2}
+  .clock b{display:block;font-size:17px;color:var(--text)}
+  .clock span{font-size:12px;color:var(--muted)}
+  .icon-btn{background:var(--surface-2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:999px;cursor:pointer;display:grid;place-items:center}
+  nav.top{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+  nav.top .container{display:flex;gap:6px;align-items:center;padding-top:8px;padding-bottom:8px;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  .pill:hover{color:var(--brand-2);background:var(--brand-soft)}
+  .pill.on{background:linear-gradient(90deg,#002259,#0047BA);color:#fff}
+  .pill.alert{margin-left:auto;background:var(--l4);color:#fff}
+  .nav-item{position:relative}
+  .menu{position:absolute;top:calc(100% + 6px);left:0;min-width:260px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px;display:none;z-index:60}
+  .nav-item:hover .menu,.nav-item:focus-within .menu{display:block}
+  .menu button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text)}
+  .menu button:hover{background:var(--surface-2)}
+  .menu button span{color:var(--acc)}
+
+  /* ---------- genéricos ---------- */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap}
+  .btn:hover{border-color:var(--brand-2)}
+  .btn.primary{background:var(--brand-2);border-color:var(--brand-2);color:#fff}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap;border:0}
+  .lv-2,.lv-3{color:#1b1b1b}
+  .lv-1{background:var(--l1);color:#fff}.lv-2{background:var(--l2)}.lv-3{background:var(--l3)}.lv-4{background:var(--l4);color:#fff}.lv-0{background:var(--l0);color:#fff}
+  .chip.ghost{background:var(--surface-2);border:1px solid var(--border);color:var(--text)}
+  .muted{color:var(--muted)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  :focus-visible{outline:2px solid var(--brand-2);outline-offset:2px}
+  .seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:3px}
+  .seg button{border:0;background:transparent;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--muted)}
+  .seg button.on{background:var(--acc);color:#fff}
+  .seg button:disabled{opacity:.4;cursor:not-allowed}
+  select{padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font:inherit;font-size:13px;max-width:100%}
+
+  /* ---------- mosaico tipo bento (composición del Observatorio) ---------- */
+  .bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:auto auto auto;gap:16px;margin-top:18px}
+  .a-mon{grid-column:1/4;grid-row:1/3}
+  .a-map{grid-column:4/10;grid-row:1/3}
+  .a-avm{grid-column:10/13;grid-row:1}
+  .a-avh{grid-column:10/13;grid-row:2}
+  .a-prm{grid-column:1/4}.a-mh{grid-column:4/7}.a-ph{grid-column:7/10}.a-st{grid-column:10/13}
+  .tile{position:relative;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s;min-width:0}
+  .tile:hover{box-shadow:0 8px 28px rgba(16,33,55,.14)}
+  .t-h{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+  .t-h .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc);flex:none}
+  .t-h h3{margin:0;font-size:13px;line-height:1.25;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}
+  .t-h .exp{margin-left:auto;flex:none;border:1px solid var(--border);background:var(--surface);border-radius:999px;height:30px;padding:0 10px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--acc)}
+  .t-h .exp:hover{background:var(--acc-soft)}
+  .t-tools{padding:0 16px 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .t-info{display:flex;flex-direction:column;gap:8px;min-width:0;padding:0 16px;flex:1}
+  /* tarjeta destacada de monitoreo (degradado azul SENAMHI, como «Tiempo en…» del Observatorio) */
+  .hero{background:linear-gradient(160deg,#0047BA 0%,#002259 100%);color:#fff;border:0}
+  .hero .t-h h3,.hero .t-h .ic{color:#fff}.hero .t-h .ic{background:rgba(255,255,255,.15)}
+  .hero .t-h .exp{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+  .hero .t-f{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+  .hero select{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3);width:100%}
+  .hero select option{color:#14212f}
+  .hero .now{font-size:12px;display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.15);padding:2px 10px;border-radius:999px;font-weight:600}
+  .hero .temp{font-size:72px;font-weight:700;letter-spacing:-.04em;line-height:1}
+  .hero .temp sup{font-size:26px;font-weight:600;vertical-align:top;margin-left:2px}
+  .hero .loc b{display:block;font-size:20px;text-transform:uppercase;line-height:1.15}
+  .hero .loc span{font-size:12.5px;opacity:.85}
+  .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .vbox{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:8px 10px;text-align:left;color:#fff;cursor:pointer}
+  .vbox.on{background:rgba(255,255,255,.24);border-color:var(--sun)}
+  .vbox .l{font-size:11.5px;opacity:.85}.vbox .v{font-size:20px;font-weight:700}.vbox .v small{font-size:11px;font-weight:500}
+  .hero .reg{font-size:11.5px;opacity:.85;border-top:1px solid rgba(255,255,255,.2);padding-top:8px}
+  /* mapa central */
+  .a-map{background:var(--map-water);padding:0;min-height:640px;cursor:default}
+  .a-map .layers{padding:12px 12px 0;display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:2}
+  .lay{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);box-shadow:var(--shadow)}
+  .lay[aria-pressed="true"]{background:linear-gradient(90deg,#002259,#0047BA);color:#fff;border-color:transparent}
+  .a-map svg.big{flex:1 1 0;min-height:0;width:100%;height:auto}
+  .a-st .mini small{display:inline;margin-left:6px}
+  .big{white-space:nowrap}
+  .a-map .legend{position:absolute;right:12px;bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:3px}
+  .a-map .legend b{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .a-map .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .a-map .legend i.c{border-radius:50%}.a-map .legend i.d{transform:rotate(45deg);border-radius:1px}
+  .a-map .src{position:absolute;left:12px;bottom:12px;font-size:11px;color:var(--muted);background:var(--surface);padding:3px 8px;border-radius:6px;border:1px solid var(--border)}
+  .bigmap .dep.click,.bigmap .pt{cursor:pointer}
+  .bigmap .dep.click:hover{fill-opacity:1}
+  /* tarjeta de aviso (como la del Observatorio) */
+  .av-card{background:linear-gradient(135deg,color-mix(in srgb,var(--lc) 16%,var(--surface)),var(--surface) 70%)}
+  .av-badge{display:inline-flex;align-items:center;gap:5px;background:var(--lc);color:var(--lci);font-size:11.5px;font-weight:800;letter-spacing:.05em;padding:3px 9px;border-radius:6px}
+  .av-t{font-size:15px;font-weight:800;text-transform:uppercase;line-height:1.25;margin:0}
+  .gauge{flex:none}
+  .big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .big small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:4px}
+  .t-info .lbl{font-size:12.5px;color:var(--muted);margin-top:-4px}
+  .mini{list-style:none;margin:0;padding:0;font-size:12.5px}
+  .mini li{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border)}
+  .mini li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mini li .nm small{display:block;color:var(--muted);font-size:11.5px}
+  .mini .sw{width:10px;height:10px;border-radius:50%;flex:none;border:1.5px solid var(--pt-stroke)}
+  .leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;color:var(--muted)}
+  .leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+  .ramp{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:2px}
+  .ramp i{flex:1}
+  .ramp-l{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted)}
+  .t-f{display:flex;gap:8px;align-items:center;padding:10px 14px;margin-top:10px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted)}
+  .t-f .live{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .t-f .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--l1)}
+  .days3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .d3{text-align:center;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:6px 2px}
+  .d3 .e{font-size:20px;line-height:1.2}
+  .d3 b{display:block;font-size:12.5px}
+  .tmax{color:var(--l4)} .tmin{color:var(--meteo)}
+  .avi-top{border-left:5px solid var(--lc);background:var(--surface-2);border-radius:8px;padding:8px 10px;font-size:12.5px}
+  .avi-top b{display:block;font-size:12.5px;line-height:1.3;margin:4px 0 2px}
+
+  /* puntos del mapa */
+  .pt{stroke:var(--pt-stroke);stroke-width:1.2;cursor:pointer}
+  .pt.off{fill:none;stroke:var(--muted);stroke-dasharray:1.5 1.5}
+  .pt.sel{stroke-width:2.6}
+  .dep{transition:fill-opacity .15s}
+  .dlg .dep.click{cursor:pointer}
+  .dlg .dep.click:hover{fill-opacity:1}
+
+  /* ---------- mosaico ampliado ---------- */
+  dialog.dlg{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:var(--bg);color:var(--text)}
+  dialog.dlg::backdrop{background:rgba(5,15,30,.55)}
+  .d-h{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow)}
+  .d-h::before{content:"";display:block;height:4px;background:var(--acc)}
+  .d-h .container{display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap}
+  .d-h .ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc);flex:none}
+  .d-h h2{margin:0;font-size:20px;letter-spacing:-.01em}
+  .d-h p{margin:0;font-size:12.5px;color:var(--muted)}
+  .d-h .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .close{width:38px;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:18px;display:grid;place-items:center}
+  .d-b{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:16px;padding-top:16px;padding-bottom:24px;align-items:start}
+  .d-map{position:sticky;top:96px;background:var(--map-water);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;height:calc(100dvh - 130px);min-height:420px}
+  .d-map svg{width:100%;height:100%}
+  .d-map .legend{position:absolute;left:12px;bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:3px;max-width:220px}
+  .d-map .legend b{font-size:12px}
+  .d-map .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+  .d-map .hint{position:absolute;right:12px;top:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--muted)}
+  .d-map .wm{position:absolute;right:12px;bottom:12px;font-size:11px;color:var(--muted);background:var(--surface);padding:3px 8px;border-radius:6px;border:1px solid var(--border)}
+  .panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .panel .after{order:2} /* p. ej., lista de avisos: el detalle seleccionado va primero */
+  .p-h{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .p-h h3{margin:0;font-size:15px;line-height:1.3}
+  .p-b{padding:14px 16px}
+  .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .kpi{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  .kpi .v{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .kpi .l{font-size:12px;color:var(--muted)}
+  .kpi .d{font-size:12px;font-weight:600;margin-top:2px}
+  .dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:13px;margin:0}
+  .dl dt{color:var(--muted)} .dl dd{margin:0;font-weight:500}
+  table.tb{width:100%;border-collapse:collapse;font-size:12.5px}
+  .tb th{text-align:left;font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:8px 6px;border-bottom:1px solid var(--border)}
+  .tb td{padding:8px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+  .tb tbody tr{cursor:pointer}
+  .tb tbody tr:hover td{background:var(--surface-2)}
+  .tb tr.sel td{background:var(--acc-soft)}
+  .note{font-size:12px;color:var(--muted);border-left:3px solid var(--acc);padding-left:10px;margin:0}
+  .txt{font-size:13.5px;line-height:1.6;margin:0}
+  .pr{display:grid;gap:8px}
+  .pr div{border-radius:8px;padding:10px 12px;font-size:13px;background:color-mix(in srgb,var(--lc) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--lc) 45%,var(--border))}
+  .pr b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .alist{display:flex;flex-direction:column;gap:8px}
+  .aitem{display:block;text-align:left;width:100%;border:1px solid var(--border);border-left:6px solid var(--lc);background:var(--surface);border-radius:10px;padding:10px 12px;cursor:pointer}
+  .aitem.on{outline:2px solid var(--acc);outline-offset:1px}
+  .aitem.old{opacity:.65}
+  .aitem b{display:block;font-size:13px;margin:4px 0 2px;line-height:1.35}
+  .aitem small{display:block;color:var(--muted);font-size:12px}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tabs button{border:0;background:transparent;padding:9px 12px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+  .tabs button.on{color:var(--acc);border-bottom-color:var(--acc)}
+  .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .thumb{border:1px solid var(--border);border-radius:8px;background:var(--map-water);padding:4px;cursor:pointer;text-align:center;font-size:11.5px}
+  .thumb svg{height:90px;width:100%}
+  .thumb.on{outline:2px solid var(--acc)}
+  .vcards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .vcard{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--surface-2);text-align:left;cursor:pointer}
+  .vcard.on{border-color:var(--acc);background:var(--acc-soft)}
+  .vcard .v{font-size:22px;font-weight:700;line-height:1.15}
+  .vcard .l{font-size:12px;color:var(--muted)}
+  .chart-leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted);margin-top:6px}
+  .chart-leg i{display:inline-block;width:14px;height:3px;margin-right:5px;vertical-align:middle;border-radius:2px}
+  .chart-leg i.dash{background:repeating-linear-gradient(90deg,currentColor 0 3px,transparent 3px 6px)!important;height:2px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:999}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  footer{margin-top:36px;background:var(--brand);color:#dbe8f6;font-size:13px}
+  footer .container{display:flex;gap:24px;justify-content:space-between;flex-wrap:wrap;padding:20px 16px}
+
+  @media (max-width:1180px){
+    .bento{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .a-map{grid-column:1/-1;grid-row:auto;min-height:560px}
+    .a-mon,.a-avm,.a-avh,.a-prm,.a-mh,.a-ph,.a-st{grid-column:auto;grid-row:auto}
+    .a-avm{order:-2}.a-avh{order:-1}
+    .d-b{grid-template-columns:minmax(0,1fr) 380px}
+    .clock{display:none}
+  }
+  @media (max-width:900px){
+    .d-b{grid-template-columns:minmax(0,1fr)}
+    .d-map{position:relative;top:0;height:min(70vh,520px);min-height:360px}
+    .logos{border-right:0;padding-right:0}
+  }
+  @media (max-width:640px){
+    .bento{grid-template-columns:minmax(0,1fr)}
+    .a-map{min-height:520px}
+    .brand-txt span,.mode span{display:none}
+    .pill{padding:7px 11px;letter-spacing:.03em}
+    .pill.alert{margin-left:0}
+    .d-h .acts{margin-left:0;width:100%}
+    .d-h .acts .close{margin-left:auto}
+    .d-map .legend{font-size:11px;padding:6px 8px;gap:1px;left:8px;bottom:8px}
+    .d-map .hint{display:none}
+    .a-map .legend{font-size:11px;padding:6px 8px;gap:1px}
+    .a-map .src{display:none}
+  }
+  @media print{header.main,nav.top,.d-h .acts{display:none}}
+</style>
+</head>
+<body>
+<div class="proto">PROTOTIPO DE ALTA FIDELIDAD · MOSAICO · Todos los datos mostrados son de ejemplo</div>
+<header class="main">
+  <div class="container">
+    <div class="logos"><div class="logo-ph" aria-label="Espacio para logo Perú · Ministerio del Ambiente">PERÚ · MINISTERIO<br>DEL AMBIENTE</div><div class="logo-ph" aria-label="Espacio para logo SENAMHI">LOGO<br>SENAMHI</div></div>
+    <a class="brand-txt" href="#/"><b>Portal de Contingencia</b><span>Servicio Nacional de Meteorología e Hidrología del Perú · canal alterno</span></a>
+    <div class="hd-r">
+      <span class="mode" title="El portal opera como canal alterno de difusión">● <span>MODO CONTINGENCIA</span></span>
+      <div class="clock"><b>10:00 a. m.</b><span>lun, 26 oct. 2026 · GMT−5</span></div>
+      <button class="icon-btn" id="theme" title="Cambiar tema" aria-label="Cambiar tema claro/oscuro">◐</button>
+    </div>
+  </div>
+</header>
+<nav class="top" aria-label="Principal"><div class="container">
+  <button class="pill on" data-go="top">Mosaico</button>
+  <div class="nav-item" style="--acc:var(--hidro)"><button class="pill" aria-haspopup="true">Hidrología ▾</button><div class="menu">
+    <button data-open="hidro-monitoreo"><span>●</span>Monitoreo hidrológico</button><button data-open="hidro-pronostico"><span>●</span>Pronóstico hidrológico</button><button data-open="hidro-avisos"><span>●</span>Avisos hidrológicos</button></div></div>
+  <div class="nav-item" style="--acc:var(--meteo)"><button class="pill" aria-haspopup="true">Meteorología ▾</button><div class="menu">
+    <button data-open="meteo-monitoreo"><span>●</span>Monitoreo meteorológico</button><button data-open="meteo-pronostico"><span>●</span>Pronóstico meteorológico</button><button data-open="meteo-avisos"><span>●</span>Avisos meteorológicos</button></div></div>
+  <button class="pill alert" id="nav-av" data-open="meteo-avisos"></button>
+</div></nav>
+
+<main class="container" id="top">
+  <div class="bento" id="bento"></div>
+</main>
+<footer><div class="container"><span><b style="color:#fff">Portal de Contingencia</b> · © 2026 SENAMHI · Servicio Nacional de Meteorología e Hidrología del Perú</span><span>Central: (01) 000-0000 · contacto@ejemplo.pe</span><span>Prototipo v0.3 · datos de ejemplo</span></div></footer>
+
+<dialog class="dlg" id="dlg" aria-labelledby="dlg-t"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="data/peru.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+/* Formato SI (Perú): coma decimal, espacio de miles, signo menos real */
+const fmt=(v,d)=>{v=+v;d=d??(Number.isInteger(v)?0:1);const[i,f]=Math.abs(v).toFixed(d).split(".");return(v<0?"−":"")+i.replace(/\B(?=(\d{3})+(?!\d))/g," ")+(f?","+f:"")};
+function rng(seed){return()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646}}
+const norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const ICON={
+  hidro:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7S6 9.3 6 14a6 6 0 0 0 12 0c0-4.7-6-11.3-6-11.3z"/></svg>',
+  meteo:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H8a5 5 0 1 1 1.6-9.7A6 6 0 0 1 21 12.5 3.5 3.5 0 0 1 17.5 19z"/></svg>',
+  mon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  pro:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/><path d="M16 8h4v4"/></svg>',
+  avi:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+  exp:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>'
+};
+
+/* =================== Niveles de peligro (nomenclatura del Observatorio) =================== */
+const LVN={4:"Extrema",3:"Fuerte",2:"Moderada",1:"Normal",0:"Mantenimiento"};
+const chipAv=l=>`<span class="chip lv-${l}">▲ ${LVN[l].toUpperCase()}</span>`;
+const chipUm=l=>`<span class="chip lv-${l}">${LVN[l]}</span>`;
+const LVC=l=>`var(--l${l})`;
+const LVI=l=>l===2||l===3?"#1b1b1b":"#fff";
+
+/* =================== HIDROLOGÍA (datos de la PoC senamhi-hidrologia) =================== */
+// stations.json + umbrales.json (caudal, m³/s). q = caudal actual; null = sin datos (mantenimiento).
+const HST=[
+  {id:"socsi",n:"Socsi",rio:"Cañete",cuenca:"Cañete",reg:"Pacífico",dep:"Lima",prov:"Cañete",dist:["Nuevo Imperial","Cañete"],pob:["Cañete","Nuevo Imperial"],lat:-13.03051,lon:-76.20027,tipo:"avenida",u:[42,54,69],q:58.4,niv:3.21,un:[1.95,3.06,4.42]},
+  {id:"chosica",n:"Chosica",rio:"Rímac",cuenca:"Rímac",reg:"Pacífico",dep:"Lima",prov:"Lima",dist:["Lurigancho-Chosica"],pob:["Chosica","Lurigancho-Chosica"],lat:-11.92986,lon:-76.68964,tipo:"avenida",u:[49,60,72],q:52.0,niv:2.14,un:[2.05,2.40,2.80]},
+  {id:"pisac",n:"Pisac",rio:"Vilcanota",cuenca:"Vilcanota",reg:"Amazonas",dep:"Cusco",prov:"Calca",dist:["Pisac","Lamay"],pob:["Pisac","Coya"],lat:-13.4195,lon:-71.8509,tipo:"avenida",u:[170,205,245],q:182.5,niv:2.86,un:[2.70,3.10,3.55]},
+  {id:"puente-ramis",n:"Puente Ramis",rio:"Ramis",cuenca:"Ramis",reg:"Titicaca",dep:"Puno",prov:"Azángaro",dist:["Arapa","Taraco"],pob:["Arapa","Taraco"],lat:-15.255309,lon:-69.873786,tipo:"vaciante",u:[22,18,15],q:16.3,niv:0.92,un:[1.10,0.98,0.85]},
+  {id:"el-tigre",n:"El Tigre",rio:"Tumbes",cuenca:"Tumbes",reg:"Pacífico",dep:"Tumbes",prov:"Tumbes",dist:["San Jacinto"],pob:["San Jacinto"],lat:-3.7688,lon:-80.4568,tipo:"avenida",u:[170,190,215],q:96.0,niv:1.62,un:[2.60,2.95,3.30]},
+  {id:"cirato",n:"Cirato",rio:"Chancay-Lambayeque",cuenca:"Chancay-Lambayeque",reg:"Pacífico",dep:"Cajamarca",prov:"Santa Cruz",dist:["Catache"],pob:["Catache"],lat:-6.65583,lon:-79.07384,tipo:"avenida",u:[165,185,210],q:null,niv:null,un:[2.4,2.8,3.2]},
+  {id:"santo-domingo",n:"Santo Domingo",rio:"Chancay-Huaral",cuenca:"Chancay-Huaral",reg:"Pacífico",dep:"Lima",prov:"Huaral",dist:["Huaral"],pob:["Huaral"],lat:-11.3836,lon:-77.0503,tipo:"avenida",u:[70,82,95],q:38.0,niv:1.05,un:[1.80,2.10,2.45]}
+];
+const estado=(v,u,tipo)=>v==null?0:tipo==="vaciante"?(v<=u[2]?4:v<=u[1]?3:v<=u[0]?2:1):(v>=u[2]?4:v>=u[1]?3:v>=u[0]?2:1);
+HST.forEach((s,i)=>{s.s=estado(s.q,s.u,s.tipo);[s.x,s.y]=PERU.proj(s.lat,s.lon);
+  const r=rng(31+i*7),asc=s.tipo==="avenida";
+  // 72 h horarias que terminan en el valor actual (ascendente en avenida, descendente en vaciante)
+  s.serQ=s.q==null?[]:Array.from({length:72},(_,h)=>{const f=h/71;return +(s.q*(asc?.72+.28*f:1.22-.22*f)+Math.sin(h/4)*s.q*.025+(r()-.5)*s.q*.03).toFixed(1)});
+  if(s.serQ.length)s.serQ[71]=s.q;
+  s.serN=s.serQ.map(v=>+(v*s.niv/s.q).toFixed(2));});
+const HS=id=>HST.find(s=>s.id===id);
+
+// forecast_inputs.json (Modelo 1–3/4), fechas desplazadas a la semana del prototipo
+const HFC={
+  "socsi":{m:[[55.4,56.7,58.0],[53.2,54.5,55.8],[50.1,51.6,53.0]],obs:[44.1,46.8,49.5,52.2,55.0,57.6]},
+  "chosica":{m:[[53.0,54.6,55.9],[55.2,57.1,58.4],[54.0,55.8,57.5]],obs:[41.2,43.0,45.6,48.1,50.2,51.6]},
+  "pisac":{m:[[186,190,193,197],[192,198,203,209],[188,195,201,206]],obs:[150,158,165,171,177,181]},
+  "el-tigre":{m:[[98,101,104],[101,106,110],[99,104,108]],obs:[88,90,92,93,95,96]}
+};
+const DIAS_OBS=["21/10","22/10","23/10","24/10","25/10","26/10"],DIAS_FC=["27/10","28/10","29/10"];
+Object.entries(HFC).forEach(([id,f])=>{f.avg=f.m.map(d=>+(d.reduce((a,b)=>a+b)/d.length).toFixed(1));f.min=f.m.map(d=>Math.min(...d));f.max=f.m.map(d=>Math.max(...d));
+  f.pico=Math.max(...f.avg);f.dpico=DIAS_FC[f.avg.indexOf(f.pico)];const s=HS(id);f.s=estado(f.pico,s.u,s.tipo);});
+
+// alerts.json (nº 1613–1616) con fechas desplazadas; 1611–1612 vencidos para mostrar el historial
+const HAV=[
+  {nro:1613,st:"socsi",nivel:3,plazo:"Extendido",ini:"26/10 09:00",fin:"01/11",vence:"01/11 15:00",dur:150,vig:true,var:"CAUDAL",val:58.40,tend:"ascendente"},
+  {nro:1616,st:"puente-ramis",nivel:3,plazo:"Normal",ini:"26/10 09:00",fin:"27/10",vence:"27/10 09:00",dur:24,vig:true,var:"CAUDAL",val:16.30,tend:"descendente"},
+  {nro:1614,st:"chosica",nivel:2,plazo:"Extendido",ini:"26/10 09:00",fin:"03/11",vence:"03/11 17:00",dur:200,vig:true,var:"CAUDAL",val:52.00,tend:"ascendente"},
+  {nro:1615,st:"pisac",nivel:2,plazo:"Extendido",ini:"26/10 09:00",fin:"03/11",vence:"03/11 17:00",dur:200,vig:true,var:"CAUDAL",val:182.50,tend:"ascendente"},
+  {nro:1612,st:"el-tigre",nivel:2,plazo:"Normal",ini:"20/10 08:00",fin:"21/10",vence:"21/10 08:00",dur:24,vig:false,var:"CAUDAL",val:172.0,tend:"descendente"},
+  {nro:1611,st:"santo-domingo",nivel:2,plazo:"Normal",ini:"18/10 08:00",fin:"19/10",vence:"19/10 08:00",dur:24,vig:false,var:"CAUDAL",val:71.3,tend:"descendente"}
+];
+HAV.forEach(a=>{const s=HS(a.st);a.s=s;a.tipo=s.tipo;a.titulo=`SITUACIÓN ACTUAL DEL CAUDAL DEL RÍO ${s.rio.toUpperCase()} - ESTACIÓN ${s.n.toUpperCase()}`;
+  a.desc=`El SENAMHI, organismo adscrito al Ministerio del Ambiente, informa sobre el comportamiento hidrológico del RÍO ${s.rio.toUpperCase()}. La estación hidrológica ${s.n.toUpperCase()} registró un ${a.var} de ${fmt(a.val,2)} m³/s, con tendencia ${a.tend}, ubicándose en el umbral ${LVN[a.nivel].toUpperCase()}. Las potenciales áreas de afectación serían los centros poblados de ${s.pob.join(", ").toUpperCase()}. Se recomienda a la población tomar las precauciones correspondientes${a.tipo==="avenida"?" y evitar realizar cualquier actividad cercana al río":""}. El SENAMHI continuará vigilando el comportamiento del río e informará oportunamente.`});
+// textos de avisos-page.ts
+const PELIGRO_H={avenida:{2:"Indica condiciones normales del río con la posibilidad de incremento en su nivel.",3:"Indica condiciones del río con tendencia ascendente en su nivel, con posibilidad de alcanzar el umbral de peligro extremo.",4:"Indica condiciones de peligro por el incremento del nivel o caudal del río, con posible desborde e inundación de zonas ribereñas."},
+  vaciante:{2:"Indica condiciones normales del río con la posibilidad de descenso en su nivel.",3:"Indica condiciones del río con tendencia descendente en su nivel.",4:"Indica condiciones donde se esperan limitaciones en el transporte fluvial por el avistamiento de rocas y obstáculos, debido a un mayor descenso en el nivel del río."}};
+const RECOM_H={avenida:{2:"Seguir reportes de la DZ. Mantenerse informado por la web institucional del SENAMHI.",3:"Evitar cruce de cauce, alejar bienes de riberas. Mantenerse informado por la web institucional del SENAMHI.",4:"Evitar cruzar el cauce, alejar bienes de riberas. Seguir indicaciones de la DZ y COEN."},
+  vaciante:{2:"Vigilar el descenso del nivel del río. Mantenerse informado por la web institucional del SENAMHI.",3:"Precaución por la tendencia descendente del nivel. Mantenerse informado por la web institucional del SENAMHI.",4:"Restringir la navegación y actividades fluviales por el descenso del nivel. Seguir indicaciones de la DZ y COEN."}};
+
+/* =================== METEOROLOGÍA (datos de la PoC senamhi-pronostico-dashboard) =================== */
+const VARS={
+  /* Paleta de temperatura sin rojo/naranja saturados para no confundirse con los niveles de aviso */
+  T:{n:"Temperatura",u:"°C",d:1,bins:[5,12,20,27],cols:["#4a6fb5","#9cc3e4","#e3eef2","#f7dc9a","#f0a98f"],lab:["<5","5–12","12–20","20–27",">27"]},
+  HR:{n:"Humedad relativa",u:"%",d:0,bins:[40,60,75,90],cols:["#f1eef6","#bdc9e1","#74a9cf","#2b8cbe","#045a8d"],lab:["<40","40–60","60–75","75–90",">90"]},
+  PP:{n:"Precipitación",u:"mm",d:1,bins:[.1,2,5,10],cols:["#f7fcf0","#bae4bc","#7bccc4","#43a2ca","#0868ac"],lab:["0","<2","2–5","5–10",">10"],zero:true,bar:true},
+  V:{n:"Viento",u:"km/h",d:0,bins:[5,10,15,25],cols:["#f2f0f7","#cbc9e2","#9e9ac8","#756bb1","#54278f"],lab:["<5","5–10","10–15","15–25",">25"]}
+};
+const vcol=(k,v)=>{const b=VARS[k].bins;let i=0;while(i<b.length&&v>=b[i])i++;return VARS[k].cols[i]};
+// estaciones.json (muestra): cada estación registra solo algunas variables (EST_METEO[i].v)
+EST_METEO.forEach((e,i)=>{const r=rng(101+i*13),selva=e.alt<1000&&e.x>110,costa=e.alt<600&&!selva;
+  const T=29-.0062*e.alt+(selva?2:0)+(costa?-4:0)+(r()-.5)*3;
+  const HR=costa?82+r()*10:selva?78+r()*15:50+r()*25;
+  const PP=selva?(r()>.35?r()*16:0):e.alt>3000?(r()>.6?r()*6:0):(r()>.85?r()*2:0);
+  const V=costa?12+r()*14:5+r()*14;
+  e.now={T:+T.toFixed(1),HR:Math.round(HR),PP:+PP.toFixed(1),V:Math.round(V)};
+  e.ser={};const rr=rng(500+i);
+  e.ser.T=Array.from({length:72},(_,h)=>+(T-5*Math.cos((h+4)/24*2*Math.PI)*(e.alt>3000?1.6:1)+(rr()-.5)).toFixed(1)-(h===71?0:0));
+  e.ser.HR=e.ser.T.map(t=>Math.max(15,Math.min(100,Math.round(HR+(T-t)*3+(rr()-.5)*4))));
+  e.ser.PP=Array.from({length:72},(_,h)=>h>58&&PP>0?+(PP/13*rr()*2).toFixed(1):(rr()>.93&&PP>0?+(rr()*2).toFixed(1):0));
+  e.ser.V=Array.from({length:72},(_,h)=>Math.max(0,Math.round(V+6*Math.sin((h-9)/24*2*Math.PI)+(rr()-.5)*4)));
+  for(const k in e.ser)e.ser[k][71]=e.now[k];
+  e.d24={T:+(e.now.T-e.ser.T[47]).toFixed(1),HR:e.now.HR-e.ser.HR[47],PP:+e.ser.PP.slice(48).reduce((a,b)=>a+b,0).toFixed(1),V:e.now.V-e.ser.V[47]};});
+const VARK=["T","HR","PP","V"];
+
+// Pronóstico por capital de departamento (3 días) — estructura de DiaPronostico (tMax, tMin, descripción, icono)
+const CIELO=[["☀️","Cielo despejado."],["🌤️","Cielo con nubes dispersas variando a cielo despejado por la tarde."],["⛅","Cielo nublado parcial con brillo solar hacia el mediodía."],["☁️","Cielo cubierto variando a nublado parcial."],["🌦️","Cielo nublado parcial con lluvia ligera por la tarde."],["🌧️","Cielo cubierto con lluvia moderada por la tarde."],["⛈️","Chubascos con descargas eléctricas por la tarde."],["🌨️","Cielo nublado con nevada ligera en zonas altas por la noche."]];
+const CAPS=[["Amazonas","Chachapoyas",23,12,[4,2,4]],["Áncash","Huaraz",23,7,[2,4,2]],["Apurímac","Abancay",26,11,[2,2,4]],["Arequipa","Arequipa",25,9,[0,1,0]],["Ayacucho","Ayacucho",25,9,[1,2,4]],["Cajamarca","Cajamarca",22,8,[4,5,4]],["Callao","Callao",20,16,[3,2,2]],["Cusco","Cusco",22,4,[2,6,4]],["Huancavelica","Huancavelica",17,1,[4,7,4]],["Huánuco","Huánuco",28,14,[1,2,4]],["Ica","Ica",30,15,[0,0,1]],["Junín","Huancayo",21,3,[2,4,6]],["La Libertad","Trujillo",24,17,[2,1,1]],["Lambayeque","Chiclayo",28,18,[1,1,2]],["Lima","Lima",21,16,[3,2,2]],["Loreto","Iquitos",33,23,[6,5,4]],["Madre de Dios","Puerto Maldonado",34,22,[2,6,5]],["Moquegua","Moquegua",28,12,[0,0,1]],["Pasco","Cerro de Pasco",12,-3,[4,7,7]],["Piura","Piura",33,21,[1,0,1]],["Puno","Puno",15,-4,[2,4,7]],["San Martín","Moyobamba",30,18,[5,6,4]],["Tacna","Tacna",26,12,[0,1,0]],["Tumbes","Tumbes",32,23,[1,2,1]],["Ucayali","Pucallpa",34,22,[2,6,5]]]
+  .map(([dep,cap,mx,mn,ic],i)=>{const r=rng(900+i);return{dep,cap,d:ic.map((c,k)=>({mx:mx+(k?Math.round((r()-.4)*3):0),mn:mn+(k?Math.round((r()-.5)*2):0),e:CIELO[c][0],t:CIELO[c][1]}))}});
+const CAP=dep=>CAPS.find(c=>norm(c.dep)===norm(dep));
+const DIAS3=["Hoy · lun 26/10","Mañana · mar 27/10","Pasado · mié 28/10"],DIAS3c=["Hoy","Mañana","Pasado"];
+
+// lib/seed.ts (avisos 342 y 343) — fechas desplazadas a la semana del prototipo; peligro/recomendación de aviso-mapa.tsx
+const NIV_M={2:{p:"Pueden ocurrir fenómenos meteorológicos peligrosos que, sin embargo, son normales en esta región.",r:"Manténgase al corriente del desarrollo de la situación meteorológica. Sea prudente si realiza actividades al aire libre que puedan acarrear riesgos en caso de mal tiempo."},
+  3:{p:"Se predicen fenómenos meteorológicos peligrosos.",r:"Manténgase al corriente del desarrollo de la situación y cumpla los consejos e instrucciones dados por las autoridades."},
+  4:{p:"Se predicen fenómenos meteorológicos de gran magnitud.",r:"Sea extremadamente precavido. Esté al corriente en todo momento del desarrollo de la situación y cumpla los consejos e instrucciones dados por las autoridades."}};
+const D342=["Tumbes","Piura","Lambayeque","La Libertad","Áncash","Lima","Ica","Arequipa","Moquegua","Tacna","Cajamarca","Huánuco","Pasco","Junín","Huancavelica","Ayacucho","Apurímac","Cusco","Puno"];
+const MAV=[
+  {num:342,cod:"342-2026-SENAMHI/DMA",nivel:4,titulo:"INCREMENTO DE TEMPERATURA DIURNA EN LA COSTA Y SIERRA",emi:"25/10/2026 10:00",ini:"26/10/2026 00:00",fin:"28/10/2026 23:59",dur:72,vig:true,deps:D342,
+   cuerpo:"El SENAMHI informa que, desde el lunes 26 al miércoles 28 de octubre, continuará el incremento de la temperatura diurna, de moderada a extrema intensidad en la costa y de moderada a fuerte intensidad en la sierra del país. Se prevé escasa nubosidad hacia el mediodía, lo que contribuirá al aumento de los niveles de radiación ultravioleta (UV). Asimismo, se esperan ráfagas de viento con velocidades cercanas a los 40 km/h, principalmente durante las horas de la tarde. No se descarta la ocurrencia de lluvia localizada en la costa norte.",
+   dias:[{f:"Lunes 26 de octubre",deps:D342,t:"Se prevén temperaturas máximas entre 29 °C y 36 °C en la costa norte, entre 24 °C y 26 °C en la costa central y entre 22 °C y 29 °C en la costa sur. En la sierra, máximas entre 20 °C y 32 °C en el norte, entre 17 °C y 29 °C en el centro y entre 14 °C y 27 °C en el sur."},
+     {f:"Martes 27 de octubre",deps:D342.filter(d=>!["Cajamarca","Pasco","Huánuco"].includes(d)),t:"Se prevén temperaturas máximas entre 29 °C y 36 °C en la costa norte, entre 24 °C y 28 °C en la costa central y entre 21 °C y 29 °C en la costa sur. En la sierra, máximas entre 18 °C y 32 °C en el norte, entre 17 °C y 28 °C en el centro y entre 14 °C y 26 °C en el sur."},
+     {f:"Miércoles 28 de octubre",deps:["Tumbes","Piura","Lambayeque","Lima","Ica","Arequipa","Moquegua","Tacna","Ayacucho","Apurímac","Cusco","Puno"],t:"Se prevén temperaturas máximas entre 29 °C y 36 °C en la costa norte, entre 24 °C y 29 °C en la costa central y entre 22 °C y 30 °C en la costa sur. En la sierra sur, registros entre 14 °C y 26 °C."}]},
+  {num:343,cod:"343-2026-SENAMHI/DMA",nivel:3,titulo:"INCREMENTO DE TEMPERATURA DIURNA EN LA SELVA NORTE Y CENTRO",emi:"25/10/2026 10:00",ini:"26/10/2026 10:00",fin:"27/10/2026 23:59",dur:38,vig:true,deps:["Loreto","San Martín","Ucayali","Huánuco","Junín"],
+   cuerpo:"El SENAMHI informa que, del lunes 26 al martes 27 de octubre, continuará el incremento de la temperatura diurna, de moderada a fuerte intensidad, en la selva norte y centro. Se prevé escasa cobertura nubosa durante el día, lo que favorecerá el aumento de la radiación ultravioleta (UV). Además, se esperan ráfagas de viento con velocidades cercanas a los 45 km/h, principalmente durante las horas de la tarde. No se descarta la ocurrencia de chubascos.",
+   dias:[{f:"Lunes 26 de octubre",deps:["Loreto","San Martín","Ucayali","Huánuco","Junín"],t:"Se prevén temperaturas máximas entre 31 °C y 38 °C en la selva norte, y próximas a los 36 °C en la selva centro."},
+     {f:"Martes 27 de octubre",deps:["Loreto","San Martín","Ucayali"],t:"Se prevén temperaturas máximas entre 30 °C y 36 °C en la selva norte."}]},
+  {num:341,nivel:2,titulo:"LLUVIAS DE LIGERA A MODERADA INTENSIDAD EN LA SELVA",emi:"20/10/2026 10:00",ini:"21/10/2026 13:00",fin:"22/10/2026 23:59",dur:35,vig:false},
+  {num:340,nivel:3,titulo:"DESCENSO DE TEMPERATURA NOCTURNA EN LA SIERRA SUR",emi:"17/10/2026 10:00",ini:"18/10/2026 00:00",fin:"20/10/2026 09:00",dur:57,vig:false},
+  {num:339,nivel:2,titulo:"INCREMENTO DE VIENTO EN LA COSTA",emi:"14/10/2026 10:00",ini:"15/10/2026 10:00",fin:"16/10/2026 23:59",dur:38,vig:false}
+];
+const nivelDep=(deps)=>{const m={};MAV.filter(a=>a.vig).forEach(a=>(deps?a.dias[deps]?.deps??[]:a.deps).forEach(d=>{const k=norm(d);m[k]=Math.max(m[k]||0,a.nivel)}));return m};
+
+/* =================== Estado de UI =================== */
+const S={lvF:null,hmon:{sel:"socsi",var:"Q",agg:"h"},hpro:{sel:"socsi"},havi:{sel:1613,f:"todos"},mmon:{var:"T",sel:null},mpro:{day:0,cap:"Lima"},mavi:{tab:342,day:0}};
+
+/* =================== Mapa del Perú (SVG) =================== */
+function peru({fill,pts=[],labels=[],click=false,aria="Mapa del Perú"}={}){
+  const deps=DEPS.map(d=>{const f=fill&&fill(d);return`<path class="dep${click&&f?" click":""}" d="${d.d}" data-dep="${d.n}" fill="${f||"var(--map-land)"}" fill-opacity="${f?.78:1}" stroke="var(--map-stroke)" stroke-width=".55" stroke-linejoin="round" fill-rule="evenodd"><title>${d.n}</title></path>`}).join("");
+  // sh: "d" = rombo (estación hidrológica), "ring" = anillo (aviso hidrológico); por defecto, círculo
+  const p=pts.map(q=>{const a=`data-id="${q.id}" data-k="${q.k||""}"`,r=q.r||5;
+    if(q.sh==="d")return`<rect class="pt${q.sel?" sel":""}" ${a} x="${q.x-r}" y="${q.y-r}" width="${2*r}" height="${2*r}" transform="rotate(45 ${q.x} ${q.y})" fill="${q.c}"><title>${q.t}</title></rect>`;
+    if(q.sh==="ring")return`<circle class="pt" ${a} cx="${q.x}" cy="${q.y}" r="${r}" fill="none" style="stroke:${q.c};stroke-width:3"><title>${q.t}</title></circle>`;
+    return`<circle class="pt${q.off?" off":""}${q.sel?" sel":""}" ${a} cx="${q.x}" cy="${q.y}" r="${r}" fill="${q.off?"none":q.c}"><title>${q.t}</title></circle>`}).join("");
+  const l=labels.map(q=>`<text x="${q.x}" y="${q.y}" font-size="${q.fs||7}" text-anchor="middle" fill="var(--text)" font-weight="600" stroke="var(--map-water)" stroke-width="2.2" paint-order="stroke">${q.t}</text>`).join("");
+  return`<svg viewBox="-6 -6 ${PERU.w+12} ${PERU.h+12}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${aria}"><text x="14" y="300" font-size="9" font-style="italic" fill="var(--map-stroke)" transform="rotate(-62 14 300)">Océano Pacífico</text>${deps}${p}${l}</svg>`;
+}
+
+/* =================== Gráfico de series (SVG) =================== */
+function chart({ser,thr=[],bands=[],band=null,split=null,xl=[],unit="",h=190,zero=false,mini=false,aria=""}){
+  const W=360,H=h,P=mini?{l:4,r:4,t:6,b:6}:{l:42,r:12,t:12,b:24},n=Math.max(...ser.map(s=>s.v.length));
+  const all=[];ser.forEach(s=>s.v.forEach(x=>x!=null&&all.push(x)));thr.forEach(t=>all.push(t.v));if(band)band.forEach(b=>b&&all.push(b[0],b[1]));
+  let mn=Math.min(...all),mx=Math.max(...all);const pad=(mx-mn)*.14||1;mn-=pad;mx+=pad;if(zero)mn=0;
+  const X=i=>P.l+i*(W-P.l-P.r)/(n-1),Y=v=>P.t+(mx-v)*(H-P.t-P.b)/(mx-mn),dec=mx-mn<8?1:0;
+  let g="";for(let k=0;k<=3;k++){const v=mn+(mx-mn)*k/3;g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--border)"/>`+(mini?"":`<text x="${P.l-6}" y="${Y(v)+3}" text-anchor="end" font-size="9" fill="var(--muted)">${fmt(v,dec)}</text>`)}
+  bands.forEach(b=>{const a=Math.max(Math.min(b.from,b.to),mn),z=Math.min(Math.max(b.from,b.to),mx);if(z>a)g+=`<rect x="${P.l}" width="${W-P.l-P.r}" y="${Y(z)}" height="${Y(a)-Y(z)}" fill="${b.c}" fill-opacity=".22"/>`});
+  if(band){const idx=band.map((b,i)=>b?i:-1).filter(i=>i>=0);g+=`<polygon points="${idx.map(i=>`${X(i)},${Y(band[i][1])}`).join(" ")} ${idx.slice().reverse().map(i=>`${X(i)},${Y(band[i][0])}`).join(" ")}" fill="var(--acc)" fill-opacity=".16"/>`}
+  thr.forEach(t=>{g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(t.v)}" y2="${Y(t.v)}" stroke="${t.c}" stroke-dasharray="5 3" stroke-width="1.4"/><text x="${W-P.r-2}" y="${Y(t.v)-3}" text-anchor="end" font-size="8.5" font-weight="600" fill="${t.c}" stroke="var(--surface)" stroke-width="2.5" paint-order="stroke">${t.l}</text>`});
+  ser.forEach(s=>{if(s.bar){const bw=(W-P.l-P.r)/n*.7;s.v.forEach((v,i)=>{if(v>0)g+=`<rect x="${X(i)-bw/2}" y="${Y(v)}" width="${bw}" height="${Y(mn)-Y(v)}" fill="${s.c}"/>`});return}
+    let d="",on=false;s.v.forEach((v,i)=>{if(v==null){on=false;return}d+=(on?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);on=true});
+    g+=`<path d="${d}" fill="none" stroke="${s.c}" stroke-width="${s.w||2.2}" stroke-linejoin="round" ${s.dash?'stroke-dasharray="5 4"':""}/>`;
+    if(s.pts)s.v.forEach((v,i)=>{if(v!=null)g+=`<circle cx="${X(i)}" cy="${Y(v)}" r="2.6" fill="${s.c}"/>`});});
+  if(split!=null)g+=`<line x1="${X(split)}" x2="${X(split)}" y1="${P.t}" y2="${H-P.b}" stroke="var(--muted)" stroke-dasharray="2 2"/>`;
+  xl.forEach(([i,t],k)=>g+=`<text x="${X(i)}" y="${H-7}" text-anchor="${k===0?"start":k===xl.length-1?"end":"middle"}" font-size="9" fill="var(--muted)">${t}</text>`);
+  return`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${aria}">${g}</svg>`;
+}
+const legItem=(c,t,dash)=>`<span style="color:${c}"><i class="${dash?"dash":""}" style="background:${c}"></i><span class="muted">${t}</span></span>`;
+
+/* =================== Mosaicos (vista compacta) =================== */
+const PRODS={
+  "hidro-monitoreo":{dom:"hidro",type:"mon",name:"Monitoreo hidrológico",sub:"Estaciones y estado por umbral",upd:"Dato horario · 26/10 09:00"},
+  "hidro-pronostico":{dom:"hidro",type:"pro",name:"Pronóstico hidrológico",sub:"Caudal pronosticado a 72 h por estación",upd:"Emitido 26/10 07:00"},
+  "hidro-avisos":{dom:"hidro",type:"avi",name:"Avisos hidrológicos",sub:"Avisos preventivos por avenida y vaciante",upd:"Emitido 26/10 09:00"},
+  "meteo-monitoreo":{dom:"meteo",type:"mon",name:"Monitoreo meteorológico",sub:"Registros de la red de estaciones",upd:"Dato horario · 26/10 10:00"},
+  "meteo-pronostico":{dom:"meteo",type:"pro",name:"Pronóstico meteorológico",sub:"Pronóstico a 3 días por capital de departamento",upd:"Emitido 26/10 05:00"},
+  "meteo-avisos":{dom:"meteo",type:"avi",name:"Avisos meteorológicos",sub:"Avisos preventivos ante eventos severos",upd:"Emitido 25/10 10:00"}
+};
+const DOMV={hidro:["var(--hidro)","var(--hidro-soft)","Hidrología"],meteo:["var(--meteo)","var(--meteo-soft)","Meteorología"]};
+const UML=[[1,"Normal"],[2,"Moderada"],[3,"Fuerte"],[4,"Extrema"],[0,"Mant."]];
+const legLv=list=>`<div class="leg">${list.map(([l,t])=>`<span><i style="background:${LVC(l)}"></i>${t}</span>`).join("")}</div>`;
+const ramp=k=>`<div><div class="ramp">${VARS[k].cols.map(c=>`<i style="background:${c}"></i>`).join("")}</div><div class="ramp-l"><span>${VARS[k].lab[0]}</span><span>${VARS[k].u}</span><span>${VARS[k].lab[4]}</span></div></div>`;
+const lvPass=()=>true;
+const sentence=t=>t.charAt(0)+t.slice(1).toLowerCase();
+
+/* Capas del mapa central (como los interruptores del mapa del Observatorio) */
+S.lay={avm:true,avh:true,eh:true,em:false,pr:false};
+const LAYERS=[["avm","Avisos meteorológicos"],["avh","Avisos hidrológicos"],["eh","Estaciones hidrológicas"],["em","Estaciones meteorológicas"],["pr","Pronóstico T. máx."]];
+
+/* Indicador semicircular del nivel de peligro (como el de la tarjeta de aviso del Observatorio) */
+function gauge(l){
+  const p=(a,r)=>[32+r*Math.cos(a*Math.PI/180),32-r*Math.sin(a*Math.PI/180)];
+  const arc=(a0,a1)=>{const[x0,y0]=p(a0,26),[x1,y1]=p(a1,26);return`M${x0.toFixed(1)} ${y0.toFixed(1)}A26 26 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`};
+  const[nx,ny]=p({2:150,3:90,4:30}[l]||150,19);
+  return`<svg class="gauge" width="72" height="43" viewBox="0 0 64 38" role="img" aria-label="Nivel de peligro ${LVN[l]}">${[[2,180,120],[3,120,60],[4,60,0]].map(([lv,a0,a1])=>`<path d="${arc(a0,a1)}" stroke="${LVC(lv)}" stroke-width="8" fill="none"/>`).join("")}<line x1="32" y1="32" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="32" r="4" fill="var(--text)"/></svg>`;
+}
+
+function tile(k,cls,body,{tools="",hero=false,style=""}={}){const p=PRODS[k],[acc,soft]=DOMV[p.dom];
+  return`<article class="card tile ${cls}${hero?" hero":""}" data-k="${k}" style="--acc:${acc};--acc-soft:${soft};${style}">
+    <div class="t-h"><div class="ic">${ICON[p.type]}</div><h3>${p.name}</h3><button class="exp" data-open="${k}" aria-label="Ampliar ${p.name}">${ICON.exp}<span>Ampliar</span></button></div>
+    ${tools?`<div class="t-tools">${tools}</div>`:""}<div class="t-info">${body}</div>
+    <div class="t-f"><span>Fuente: SENAMHI</span><span class="live">${p.upd}</span></div></article>`}
+
+const BENTO={
+  /* Tarjeta destacada: estación seleccionada, solo con las variables que registra */
+  mon:()=>{const e=EST_METEO.find(x=>x.id===S.mmon.sel)||EST_METEO.find(x=>x.n==="Unjf Sánchez Carrión");S.mmon.sel=e.id;
+    const mk=e.v.includes(S.mmon.var)?S.mmon.var:e.v[0],V=VARS[mk],t=e.ser.T;
+    return tile("meteo-monitoreo","a-mon",`
+      <select data-est aria-label="Elegir estación">${EST_METEO.map(x=>`<option value="${x.id}" ${x===e?"selected":""}>${x.n} · ${x.dep}</option>`).join("")}</select>
+      <div class="loc"><span class="now">● Ahora · 10:00</span><b style="margin-top:6px">${e.n}</b><span>${e.dep} · ${e.prov} · ${fmt(e.alt)} m s. n. m.</span></div>
+      <div><div class="temp">${fmt(mk==="PP"?e.d24.PP:e.now[mk],V.d)}<sup>${V.u}</sup></div><div style="font-size:12.5px;opacity:.85">${V.n}${mk==="PP"?" acumulada 24 h":""}${t&&e.v.includes("T")&&mk==="T"?` · Máx ${fmt(Math.max(...t.slice(48)),1)}° · Mín ${fmt(Math.min(...t.slice(48)),1)}°`:""}</div></div>
+      <div class="vgrid">${e.v.map(x=>`<button class="vbox ${x===mk?"on":""}" data-mvar="${x}"><div class="l">${VARS[x].n}</div><div class="v">${fmt(x==="PP"?e.d24.PP:e.now[x],VARS[x].d)} <small>${VARS[x].u}${x==="PP"?" · 24 h":""}</small></div></button>`).join("")}</div>
+      <div class="reg">Esta estación registra <b>${e.v.length} de 4</b> variables: ${e.v.map(x=>VARS[x].n.toLowerCase()).join(", ")}.<br>Red: ${EST_METEO.length} estaciones transmitiendo.</div>`,{hero:true})},
+
+  map:()=>{const L=S.lay,m=nivelDep(),k=S.mmon.var,pts=[];
+    if(L.em)EST_METEO.forEach(e=>{const on=e.v.includes(k);pts.push({k:"em",id:e.id,x:e.x,y:e.y,r:on?4.5:3.2,off:!on,c:on?vcol(k,e.now[k]):"",t:`${e.n} · ${on?fmt(e.now[k],VARS[k].d)+" "+VARS[k].u:"no registra "+VARS[k].n.toLowerCase()}`})});
+    if(L.eh)HST.forEach(s=>pts.push({k:"eh",sh:"d",id:s.id,x:s.x,y:s.y,r:5,c:LVC(s.s),t:`Estación hidrológica ${s.n} · río ${s.rio} · ${LVN[s.s]}`}));
+    if(L.avh)HAV.filter(a=>a.vig).forEach(a=>pts.push({k:"ah",sh:"ring",id:a.nro,x:a.s.x,y:a.s.y,r:11,c:LVC(a.nivel),t:`Aviso hidrológico N° ${a.nro} · ${a.s.n} · ${LVN[a.nivel]}`}));
+    const fill=d=>L.avm&&m[norm(d.n)]?LVC(m[norm(d.n)]):L.pr?vcol("T",CAP(d.n).d[S.mpro.day].mx):null;
+    const labels=L.pr?DEPS.filter(d=>d.n!=="Callao").map(d=>({x:d.cx,y:d.cy+3,t:`${CAP(d.n).d[S.mpro.day].e}${CAP(d.n).d[S.mpro.day].mx}°`,fs:8})):[];
+    const leg=[];
+    if(L.avm||L.avh||L.eh)leg.push(`<b>Nivel de peligro</b>${[2,3,4].map(l=>`<span><i style="background:${LVC(l)}"></i>${LVN[l]}</span>`).join("")}`);
+    if(L.eh||L.avh)leg.push(`${L.eh?`<span><i class="d" style="background:var(--l1);border:1px solid var(--pt-stroke)"></i>Estación hidrológica</span>`:""}${L.avh?`<span><i class="c" style="border:2.5px solid var(--l3)"></i>Aviso hidrológico</span>`:""}`);
+    if(L.em)leg.push(`<b>${VARS[k].n} (${VARS[k].u})</b>${ramp(k)}`);
+    if(L.pr)leg.push(`<b>T. máx. · ${DIAS3c[S.mpro.day]} (°C)</b>${ramp("T")}`);
+    return`<section class="card tile a-map bigmap" aria-label="Mapa nacional con capas">
+      <div class="layers" role="group" aria-label="Capas del mapa">${LAYERS.map(([id,t])=>`<button class="lay" data-lay="${id}" aria-pressed="${!!L[id]}">${t}</button>`).join("")}</div>
+      ${peru({fill,pts,labels,click:true,aria:"Mapa nacional de avisos y estaciones"}).replace("<svg ",'<svg class="big" ')}
+      ${leg.length?`<div class="legend">${leg.join("")}</div>`:""}<span class="src">Toca una zona o estación para ver el detalle · datos de ejemplo</span></section>`},
+
+  avm:()=>{const v=MAV.filter(x=>x.vig).sort((a,b)=>b.nivel-a.nivel),a=v[0];
+    return tile("meteo-avisos","a-avm av-card",`
+      <div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between"><div><span class="av-badge">▲ ${LVN[a.nivel].toUpperCase()}</span> <span class="muted" style="font-size:12px;margin-left:4px">Aviso N° ${a.num}</span><div class="muted" style="font-size:12px;margin-top:4px">${v.length} avisos vigentes</div></div>${gauge(a.nivel)}</div>
+      <p class="av-t">${a.titulo}</p>
+      <div style="font-size:12.5px">📅 ${a.ini.slice(0,5)} → ${a.fin.slice(0,5)} · ${a.dur} h · ${a.deps.length} departamentos</div>
+      <div class="muted" style="font-size:12.5px">${NIV_M[a.nivel].r}</div>
+      <ul class="mini">${v.slice(1).map(x=>`<li>${chipAv(x.nivel)}<span class="nm">N° ${x.num} · ${sentence(x.titulo)}</span></li>`).join("")}</ul>
+      <div><button class="btn" data-lay="avm" style="border-radius:999px;color:var(--l4)">${S.lay.avm?"Ocultar en el mapa":"Mostrar en el mapa"}</button></div>`,{style:`--lc:${LVC(a.nivel)};--lci:${LVI(a.nivel)}`})},
+
+  avh:()=>{const v=HAV.filter(x=>x.vig).sort((a,b)=>b.nivel-a.nivel),c=l=>v.filter(x=>x.nivel===l).length;
+    return tile("hidro-avisos","a-avh",`
+      <div style="display:flex;gap:12px;align-items:center"><div class="big">${v.length}</div><div style="font-size:12.5px;line-height:1.35">avisos hidrológicos vigentes en el país<br><span class="muted">${[4,3,2].filter(c).map(l=>`${c(l)} ${LVN[l].toLowerCase()}`).join(" · ")}</span></div></div>
+      <ul class="mini">${v.slice(0,3).map(a=>`<li>${chipAv(a.nivel)}<span class="nm">Río ${a.s.rio} · ${a.s.n}<small>${a.tipo==="avenida"?"Avenida":"Vaciante"} · vence ${a.vence}</small></span></li>`).join("")}</ul>
+      <div><button class="btn" data-lay="avh" style="border-radius:999px;color:var(--acc)">${S.lay.avh?"Ocultar en el mapa":"Mostrar en el mapa"}</button></div>`)},
+
+  prm:()=>{const d=S.mpro.day,c=CAP(S.mpro.cap),hot=CAPS.reduce((a,b)=>b.d[d].mx>a.d[d].mx?b:a),cold=CAPS.reduce((a,b)=>b.d[d].mn<a.d[d].mn?b:a);
+    return tile("meteo-pronostico","a-prm",`
+      <select data-capt aria-label="Elegir capital">${CAPS.map(x=>`<option ${x===c?"selected":""}>${x.cap}</option>`).join("")}</select>
+      <div class="days3">${c.d.map((x,i)=>`<button class="d3" data-mday="${i}" style="cursor:pointer;${i===d?"border-color:var(--acc);background:var(--acc-soft)":""}"><div class="eyebrow" style="font-size:9.5px">${DIAS3c[i]}</div><div class="e">${x.e}</div><b><span class="tmax">${fmt(x.mx)}°</span> / <span class="tmin">${fmt(x.mn)}°</span></b></button>`).join("")}</div>
+      <div class="muted" style="font-size:12px">${c.d[d].t}</div>
+      <ul class="mini"><li><span class="nm">Más cálida · ${hot.cap}</span><b class="num tmax">${fmt(hot.d[d].mx)}°</b></li><li><span class="nm">Más fría · ${cold.cap}</span><b class="num tmin">${fmt(cold.d[d].mn)}°</b></li></ul>`)},
+
+  mh:()=>{const sob=HST.filter(s=>s.s>=2),top=[...HST].sort((a,b)=>b.s-a.s||(b.q||0)-(a.q||0)).slice(0,3);
+    return tile("hidro-monitoreo","a-mh",`
+      <div style="display:flex;gap:12px;align-items:center"><div class="big">${sob.length}<small>de ${HST.length}</small></div><div style="font-size:12.5px">estaciones con nivel de peligro</div></div>
+      <ul class="mini">${top.map(s=>`<li><span class="sw" style="background:${LVC(s.s)}"></span><span class="nm">${s.n}<small>Río ${s.rio}</small></span><b class="num">${s.q==null?"—":fmt(s.q)+" m³/s"}</b></li>`).join("")}</ul>${legLv(UML)}`)},
+
+  ph:()=>{const f=HFC[S.hpro.sel],s=HS(S.hpro.sel),c=Object.keys(HFC).filter(id=>HFC[id].s>=2).length;
+    return tile("hidro-pronostico","a-ph",`
+      <div style="display:flex;gap:12px;align-items:center"><div class="big">${c}<small>de ${Object.keys(HFC).length}</small></div><div style="font-size:12.5px">estaciones con pronóstico sobre umbral</div></div>
+      <div style="font-size:12.5px"><b>${s.n}</b> · río ${s.rio} · pico ${fmt(f.pico)} m³/s el ${f.dpico} ${chipUm(f.s)}</div>
+      ${chart({ser:[{v:[...f.obs,null,null,null],c:"var(--acc)"},{v:[null,null,null,null,null,f.obs[5],...f.avg],c:"var(--acc)",dash:true}],band:[null,null,null,null,null,[f.obs[5],f.obs[5]],...f.min.map((m,i)=>[m,f.max[i]])],thr:[{v:s.u[0],c:LVC(2),l:""},{v:s.u[1],c:LVC(3),l:""}],split:5,h:110,mini:true,aria:`Mini hidrograma pronosticado de ${s.n}`})}
+      <div class="chart-leg">${legItem("var(--acc)","Observado")}${legItem("var(--acc)","Pronóstico",1)}</div>`)},
+
+  /* Celda libre del bento: estado del canal de contingencia (fuente y hora de cada producto) */
+  st:()=>`<section class="card tile a-st" style="cursor:default;--acc:var(--brand-2);--acc-soft:var(--brand-soft)">
+      <div class="t-h"><div class="ic">●</div><h3>Estado del servicio</h3></div>
+      <div class="t-info"><div style="font-size:12.5px"><span class="mode" style="display:inline-flex">● CANAL ALTERNO ACTIVO</span><div class="muted" style="margin-top:6px">Desde 26/10/2026 06:00 · fuente: Sistema de Continuidad Operativa</div></div>
+      <ul class="mini">${Object.entries(PRODS).map(([k,p])=>`<li><span class="sw" style="background:var(--l1);border-color:var(--l1)"></span><button class="nm" data-open="${k}" style="border:0;background:none;padding:0;text-align:left;cursor:pointer;color:var(--text);font:inherit">${p.name}<small>${p.upd}</small></button></li>`).join("")}</ul></div></section>`
+};
+
+function renderTiles(){
+  $("#bento").innerHTML=["mon","map","avm","avh","prm","mh","ph","st"].map(k=>BENTO[k]()).join("");
+  $("#nav-av").textContent=`▲ ${HAV.filter(a=>a.vig).length+MAV.filter(a=>a.vig).length} avisos vigentes`;
+}
+
+/* =================== Mosaico ampliado =================== */
+const panelCard=(h,b,cls="")=>`<div class="card ${cls}">${h?`<div class="p-h">${h}</div>`:""}<div class="p-b">${b}</div></div>`;
+const DET={
+  "hidro-monitoreo":()=>{const s=HS(S.hmon.sel),isQ=S.hmon.var==="Q",u=isQ?s.u:s.un,unit=isQ?"m³/s":"m";
+    let ser=isQ?s.serQ:s.serN,xl=[[0,"−72 h"],[36,"−36 h"],[71,"Ahora"]];
+    if(S.hmon.agg==="d"&&ser.length){ser=[0,1,2].map(d=>+(ser.slice(d*24,d*24+24).reduce((a,b)=>a+b)/24).toFixed(2));xl=[[0,"24/10"],[1,"25/10"],[2,"26/10"]]}
+    const st=estado(isQ?s.q:s.niv,u,s.tipo),prox=s.tipo==="vaciante"?u.find(x=>(isQ?s.q:s.niv)>x):u.find(x=>(isQ?s.q:s.niv)<x);
+    return{legend:`<b>Estado por umbral</b>${UML.map(([l,t])=>`<span><i style="background:${LVC(l)}"></i>${l===0?"Mantenimiento":t}</span>`).join("")}`,
+      map:peru({pts:HST.map(x=>({id:x.id,x:x.x,y:x.y,r:x.id===s.id?9:7,sel:x.id===s.id,c:LVC(x.s),t:`${x.n} · ${LVN[x.s]}`})),labels:HST.map(x=>({x:x.x,y:x.y-11,t:x.n})),aria:"Mapa de estaciones hidrológicas"}),
+      panel:panelCard(`<div><div class="eyebrow">Estación seleccionada</div><h3>Hidrograma de ${isQ?"caudal":"nivel"} del río ${s.rio}</h3><span class="muted" style="font-size:12.5px">Estación ${s.n} · ${s.dep}</span></div>${chipUm(s.s)}`,
+        s.q==null?`<p class="txt muted">Estación en mantenimiento: sin datos en las últimas 72 h.</p>`:
+        `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><div class="seg" role="group" aria-label="Variable"><button data-hvar="Q" class="${isQ?"on":""}">Caudal</button><button data-hvar="N" class="${!isQ?"on":""}">Nivel</button></div><div class="seg" role="group" aria-label="Agregación"><button data-hagg="h" class="${S.hmon.agg==="h"?"on":""}">Horario</button><button data-hagg="d" class="${S.hmon.agg==="d"?"on":""}">Diario</button></div></div>
+        <div class="kpis"><div class="kpi"><div class="v">${fmt(isQ?s.q:s.niv,isQ?1:2)}</div><div class="l">${unit} · actual</div></div><div class="kpi"><div class="v" style="color:${LVC(st||1)}">${st>=2?LVN[st]:"Normal"}</div><div class="l">${prox!=null?`próximo umbral: ${fmt(prox,isQ?0:2)} ${unit}`:"sobre umbral extrema"}</div></div></div>
+        <div style="margin-top:10px">${chart({ser:[{v:ser,c:"var(--acc)",pts:S.hmon.agg==="d"}],thr:[{v:u[0],c:LVC(2),l:"Moderada"},{v:u[1],c:LVC(3),l:"Fuerte"},{v:u[2],c:LVC(4),l:"Extrema"}],xl,unit,aria:`Hidrograma de ${s.n}`})}</div>
+        <div class="chart-leg">${legItem("var(--acc)",S.hmon.agg==="d"?"Datos diarios":"Datos horarios")}${legItem(LVC(2),"Umbral moderada",1)}${legItem(LVC(3),"Umbral fuerte",1)}${legItem(LVC(4),"Umbral extrema",1)}</div>
+        <p class="note" style="margin-top:10px">Información en tiempo casi real, sujeta a revisión y validación. Umbrales de tipo <b>${s.tipo}</b>${s.tipo==="vaciante"?" (alerta cuando el valor baja)":""}.</p>`)+
+        panelCard(`<h3>Ficha de la estación</h3>`,`<dl class="dl"><dt>Río</dt><dd>${s.rio}</dd><dt>Cuenca</dt><dd>${s.cuenca}</dd><dt>Región hidrográfica</dt><dd>${s.reg}</dd><dt>Departamento</dt><dd>${s.dep}</dd><dt>Provincia</dt><dd>${s.prov}</dd><dt>Distritos</dt><dd>${s.dist.join(", ")}</dd></dl>`)+
+        panelCard(`<h3>Estaciones (${HST.length})</h3><span class="muted" style="font-size:12px">ordenadas por estado</span>`,`<table class="tb"><thead><tr><th>Estación</th><th class="num">Caudal (m³/s)</th><th>Estado</th></tr></thead><tbody>${[...HST].sort((a,b)=>b.s-a.s).map(x=>`<tr data-sel="${x.id}" class="${x.id===s.id?"sel":""}"><td><b>${x.n}</b><br><span class="muted">Río ${x.rio}</span></td><td class="num">${x.q==null?"—":fmt(x.q)}</td><td>${chipUm(x.s)}</td></tr>`).join("")}</tbody></table>`)}},
+  "hidro-pronostico":()=>{const id=S.hpro.sel,s=HS(id),f=HFC[id],nm=f.m[0].length;
+    return{legend:`<b>Estaciones con pronóstico</b><span><i style="background:var(--acc)"></i>Pronóstico disponible</span><span><i style="background:var(--map-land);border:1px solid var(--map-stroke)"></i>Sin pronóstico</span>`,
+      map:peru({pts:HST.map(x=>({id:x.id,x:x.x,y:x.y,r:x.id===id?9:6,sel:x.id===id,off:!HFC[x.id],c:"var(--acc)",t:x.n+(HFC[x.id]?"":" · sin pronóstico")})),labels:Object.keys(HFC).map(k=>({x:HS(k).x,y:HS(k).y-11,t:HS(k).n})),aria:"Mapa de estaciones con pronóstico"}),
+      panel:panelCard(`<div><div class="eyebrow">Pronóstico diario · emitido 26/10 07:00</div><h3>Caudal pronosticado del río ${s.rio}</h3><span class="muted" style="font-size:12.5px">Estación ${s.n}</span></div>${chipUm(f.s)}`,
+        `<div class="kpis"><div class="kpi"><div class="v">${fmt(f.pico)}</div><div class="l">m³/s · pico esperado (${f.dpico})</div></div><div class="kpi"><div class="v" style="color:${LVC(f.s||1)}">${f.s>=2?"Sí":"No"}</div><div class="l">${f.s>=2?"supera umbral "+LVN[f.s].toLowerCase():"supera umbral"} en 72 h</div></div></div>
+        <div style="margin-top:10px">${chart({ser:[{v:[...f.obs,null,null,null],c:"var(--acc)",pts:true},{v:[null,null,null,null,null,f.obs[5],...f.avg],c:"var(--acc)",dash:true,pts:true}],band:[null,null,null,null,null,[f.obs[5],f.obs[5]],...f.min.map((m,i)=>[m,f.max[i]])],thr:[{v:s.u[0],c:LVC(2),l:"Moderada"},{v:s.u[1],c:LVC(3),l:"Fuerte"},{v:s.u[2],c:LVC(4),l:"Extrema"}],split:5,xl:[[0,"21/10"],[3,"24/10"],[5,"Hoy"],[8,"29/10"]],aria:`Caudal observado y pronosticado de ${s.n}`})}</div>
+        <div class="chart-leg">${legItem("var(--acc)","Caudal promedio observado")}${legItem("var(--acc)","Caudal pronosticado (promedio de "+nm+" modelos)",1)}<span><i style="background:var(--acc);opacity:.25;height:8px"></i><span class="muted">Mín – Máx de modelos</span></span></div>`)+
+        panelCard(`<h3>Pronóstico por modelo (m³/s)</h3>`,`<div style="overflow-x:auto"><table class="tb"><thead><tr><th>Fecha</th>${f.m[0].map((_,i)=>`<th class="num">Mod. ${i+1}</th>`).join("")}<th class="num">Prom.</th><th>Estado</th></tr></thead><tbody>${f.m.map((d,i)=>`<tr><td>${DIAS_FC[i]}</td>${d.map(v=>`<td class="num">${fmt(v,1)}</td>`).join("")}<td class="num"><b>${fmt(f.avg[i])}</b></td><td>${chipUm(estado(f.avg[i],s.u,s.tipo))}</td></tr>`).join("")}</tbody></table></div>`)+
+        panelCard(`<h3>Estaciones con pronóstico</h3>`,`<table class="tb"><thead><tr><th>Estación</th><th class="num">Pico (m³/s)</th><th>72 h</th></tr></thead><tbody>${Object.keys(HFC).map(k=>`<tr data-sel="${k}" class="${k===id?"sel":""}"><td><b>${HS(k).n}</b><br><span class="muted">Río ${HS(k).rio}</span></td><td class="num">${fmt(HFC[k].pico)}</td><td>${chipUm(HFC[k].s)}</td></tr>`).join("")}</tbody></table>`)}},
+  "hidro-avisos":()=>{const F=S.havi.f,list=HAV.filter(a=>(F==="todos"||(F==="vig"?a.vig:a.nivel===+F))&&lvPass(a.nivel));
+    let a=HAV.find(x=>x.nro===S.havi.sel);if(!list.includes(a))a=list[0];
+    const s=a?.s,u=s?.u,cnt=f=>HAV.filter(x=>f==="todos"||(f==="vig"?x.vig:x.nivel===+f)).length;
+    const bands=a?(a.tipo==="avenida"?[{from:u[0],to:u[1],c:LVC(2)},{from:u[1],to:u[2],c:LVC(3)},{from:u[2],to:u[2]*1.5,c:LVC(4)}]:[{from:u[0],to:u[1],c:LVC(2)},{from:u[1],to:u[2],c:LVC(3)},{from:u[2],to:0,c:LVC(4)}]):[];
+    return{legend:`<b>Nivel del aviso</b>${[4,3,2].map(l=>`<span><i style="background:${LVC(l)}"></i>${LVN[l]}</span>`).join("")}<span><i style="background:#16a34a"></i>Centro poblado afectado</span>`,
+      map:peru({fill:d=>a&&norm(a.s.dep)===norm(d.n)?LVC(a.nivel):null,pts:HAV.filter(x=>x.vig).map(x=>({id:x.nro,x:x.s.x,y:x.s.y,r:x===a?9:7,sel:x===a,c:LVC(x.nivel),t:`Aviso N° ${x.nro} · ${x.s.n}`})),labels:HAV.filter(x=>x.vig).map(x=>({x:x.s.x,y:x.s.y-11,t:x.s.n})),aria:"Mapa de avisos hidrológicos"}),
+      panel:panelCard("",`<div class="chips" role="group" aria-label="Filtro rápido">${[["todos","Todos"],["4","Extrema"],["3","Fuerte"],["2","Moderada"],["vig","Vigentes"]].map(([k,t])=>`<button class="chip ${F===k?(+k?"lv-"+k:"lv-0"):"ghost"}" data-hf="${k}" aria-pressed="${F===k}">${t} (${cnt(k)})</button>`).join("")}</div>
+        <div class="alist" style="margin-top:12px">${list.map(x=>`<button class="aitem ${x===a?"on":""} ${x.vig?"":"old"}" style="--lc:${LVC(x.nivel)}" data-av="${x.nro}"><div class="chips">${chipAv(x.nivel)}<span class="chip ghost">N° ${x.nro}</span>${x.vig?"":'<span class="chip ghost">Vencido</span>'}</div><b>${x.titulo}</b><small>${x.ini} → ${x.vence} · ${x.dur} h · ${x.tipo==="avenida"?"Avenida":"Vaciante"}</small></button>`).join("")||'<p class="muted">Sin avisos para el filtro seleccionado.</p>'}</div>`,"after")+
+      (a?panelCard(`<div><div class="eyebrow">Aviso N° ${a.nro} · emitido lunes, 26 de octubre de 2026 - 09:00 hrs</div><h3>${a.titulo}</h3></div>${chipAv(a.nivel)}`,
+        `<dl class="dl"><dt>Fecha de inicio</dt><dd>${a.ini}</dd><dt>Fecha de final</dt><dd>${a.vence}</dd><dt>Plazo</dt><dd>${a.plazo} · ${a.dur} h</dd><dt>Tipo</dt><dd>${a.tipo==="avenida"?"Avenida":"Vaciante"}</dd></dl>
+        <p class="txt" style="margin-top:10px">${a.desc}</p>
+        <div style="margin-top:10px">${chart({ser:[{v:s.serQ.slice(6),c:"#1d4ed8"}],bands,xl:[[0,"−66 h"],[33,"−33 h"],[65,"Ahora"]],aria:`Hidrograma del aviso ${a.nro}`})}</div>
+        <div class="chart-leg">${legItem("#1d4ed8","Caudal (m³/s)")}<span><i style="background:${LVC(2)};opacity:.5;height:8px"></i><span class="muted">Umbral moderada</span></span><span><i style="background:${LVC(3)};opacity:.5;height:8px"></i><span class="muted">Fuerte</span></span><span><i style="background:${LVC(4)};opacity:.5;height:8px"></i><span class="muted">Extrema</span></span></div>
+        <table class="tb" style="margin-top:10px"><thead><tr><th>Cuerpo de agua</th><th>Estación</th><th class="num">Caudal actual (m³/s)</th><th class="num">Umbral extrema</th></tr></thead><tbody><tr><td>Río ${s.rio}</td><td>${s.n}</td><td class="num">${fmt(a.val,2)}</td><td class="num">${fmt(u[2])}</td></tr></tbody></table>`)+
+      panelCard(`<h3>Zonas de posible afectación</h3>`,`<dl class="dl"><dt>Centros poblados</dt><dd>${s.pob.join(", ")}</dd><dt>Departamento</dt><dd>${s.dep}</dd><dt>Provincia</dt><dd>${s.prov}</dd><dt>Distritos</dt><dd>${s.dist.join(", ")}</dd></dl>
+        <div class="pr" style="margin-top:12px;--lc:${LVC(a.nivel)}"><div><b>Peligro</b>${PELIGRO_H[a.tipo][a.nivel]}</div><div><b>Recomendación</b>${RECOM_H[a.tipo][a.nivel]}</div></div>`):"")}},
+  "meteo-monitoreo":()=>{const k=S.mmon.var,V=VARS[k];let e=EST_METEO.find(x=>x.id===S.mmon.sel);if(!e)e=EST_METEO.find(x=>x.n==="Unjf Sánchez Carrión")||EST_METEO[0];
+    const ek=e.v.includes(k)?k:e.v[0],EV=VARS[ek],rank=EST_METEO.filter(x=>x.v.includes(k)).sort((a,b)=>b.now[k]-a.now[k]).slice(0,8);
+    return{legend:`<b>${V.n} (${V.u})</b>${V.cols.map((c,i)=>`<span><i style="background:${c};border:1px solid var(--map-stroke)"></i>${V.lab[i]}</span>`).join("")}<span><i style="border:1.5px dashed var(--muted)"></i>No registra</span>`,
+      map:peru({pts:EST_METEO.map(x=>{const on=x.v.includes(k);return{id:x.id,x:x.x,y:x.y,r:x.id===e.id?7:on?5:3.5,sel:x.id===e.id,off:!on,c:on?vcol(k,x.now[k]):"",t:`${x.n} · ${on?fmt(x.now[k],V.d)+" "+V.u:"no registra"}`}}),aria:"Mapa de estaciones meteorológicas"}),
+      tools:`<div class="seg" role="group" aria-label="Variable del mapa">${VARK.map(x=>`<button data-mvar="${x}" class="${x===k?"on":""}">${VARS[x].n}</button>`).join("")}</div>`,
+      panel:panelCard(`<div><div class="eyebrow">Estación ${e.id}</div><h3>${e.n}</h3><span class="muted" style="font-size:12.5px">${e.dep} · ${e.prov} · ${fmt(e.alt)} m s. n. m.</span></div>`,
+        `<p style="margin:0 0 10px;font-size:12.5px">Esta estación registra: ${e.v.map(x=>`<span class="chip ghost">${VARS[x].n}</span>`).join(" ")}</p>
+        <div class="vcards">${e.v.map(x=>`<button class="vcard ${x===ek?"on":""}" data-evar="${x}"><div class="l">${VARS[x].n}${x==="PP"?" · 24 h":""}</div><div class="v">${fmt(x==="PP"?e.d24.PP:e.now[x],VARS[x].d)} <small style="font-size:12px;font-weight:500">${VARS[x].u}</small></div>${x==="PP"?`<div class="l">última hora: ${fmt(e.now.PP,1)} mm</div>`:`<div class="l">${e.d24[x]>=0?"▲":"▼"} ${fmt(Math.abs(e.d24[x]),VARS[x].d)} vs. hace 24 h</div>`}</button>`).join("")}</div>
+        <div style="margin-top:12px"><div class="eyebrow" style="margin-bottom:4px">${EV.n} · últimas 72 h (${EV.u})</div>${chart({ser:[{v:e.ser[ek],c:"var(--acc)",bar:EV.bar}],zero:EV.zero,xl:[[0,"−72 h"],[36,"−36 h"],[71,"Ahora"]],aria:`${EV.n} en ${e.n}`})}</div>
+        <p class="note" style="margin-top:8px">Dato horario de estación automática, sujeto a control de calidad.</p>`)+
+        panelCard(`<h3>${k==="T"||k==="V"?"Valores más altos":"Mayores registros"} · ${V.n}</h3>`,`<table class="tb"><thead><tr><th>Estación</th><th class="num">${V.u}</th></tr></thead><tbody>${rank.map(x=>`<tr data-sel="${x.id}" class="${x.id===e.id?"sel":""}"><td><b>${x.n}</b><br><span class="muted">${x.dep}</span></td><td class="num">${fmt(x.now[k],V.d)}</td></tr>`).join("")}</tbody></table>`)}},
+  "meteo-pronostico":()=>{const d=S.mpro.day,c=CAP(S.mpro.cap);
+    return{legend:`<b>Temperatura máxima · ${DIAS3c[d]}</b>${VARS.T.cols.map((col,i)=>`<span><i style="background:${col};border:1px solid var(--map-stroke)"></i>${VARS.T.lab[i]} °C</span>`).join("")}`,
+      tools:`<div class="seg" role="group" aria-label="Día">${DIAS3.map((t,i)=>`<button data-mday="${i}" class="${i===d?"on":""}">${t}</button>`).join("")}</div>`,
+      map:peru({click:true,fill:dp=>{const x=CAP(dp.n);return x?vcol("T",x.d[d].mx):null},labels:DEPS.map(x=>({x:x.cx,y:x.cy+3,t:CAP(x.n).d[d].e,fs:x.n==="Callao"?0:10})),aria:"Mapa de pronóstico por departamento"}),
+      hint:"Toca un departamento para ver su pronóstico",
+      panel:panelCard(`<div><div class="eyebrow">Pronóstico · ${c.dep}</div><h3>${c.cap}</h3></div><select data-cap aria-label="Capital">${CAPS.map(x=>`<option ${x===c?"selected":""}>${x.cap}</option>`).join("")}</select>`,
+        `<div class="alist">${c.d.map((x,i)=>`<div class="aitem" style="--lc:${i===d?"var(--acc)":"var(--border)"};cursor:default"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:30px">${x.e}</span><div style="flex:1"><div class="eyebrow">${DIAS3[i]}</div><b style="margin:2px 0"><span class="tmax">Máx ${fmt(x.mx)} °C</span> · <span class="tmin">Mín ${fmt(x.mn)} °C</span></b><small>${x.t}</small></div></div></div>`).join("")}</div>`)+
+        panelCard(`<h3>Capitales de departamento · ${DIAS3c[d]}</h3>`,`<table class="tb"><thead><tr><th>Ciudad</th><th></th><th class="num">Máx</th><th class="num">Mín</th></tr></thead><tbody>${CAPS.map(x=>`<tr data-cap="${x.cap}" class="${x===c?"sel":""}"><td><b>${x.cap}</b><br><span class="muted">${x.dep}</span></td><td style="font-size:18px">${x.d[d].e}</td><td class="num tmax">${fmt(x.d[d].mx)}°</td><td class="num tmin">${fmt(x.d[d].mn)}°</td></tr>`).join("")}</tbody></table>`)}},
+  "meteo-avisos":()=>{const tab=S.mavi.tab,a=MAV.find(x=>x.num===tab),vig=MAV.filter(x=>x.vig&&lvPass(x.nivel));
+    const tabs=`<div class="tabs" role="tablist">${vig.map(x=>`<button role="tab" data-mtab="${x.num}" class="${x.num===tab?"on":""}">Aviso N° ${x.num}</button>`).join("")}<button role="tab" data-mtab="0" class="${!a?"on":""}">Anteriores</button></div>`;
+    if(!a){return{legend:`<b>Avisos vigentes</b>${[4,3,2].map(l=>`<span><i style="background:${LVC(l)}"></i>Nivel ${l} · ${LVN[l]}</span>`).join("")}`,
+      map:peru({fill:d=>{const m=nivelDep();return m[norm(d.n)]?LVC(m[norm(d.n)]):null}}),
+      panel:panelCard("",tabs+`<div style="overflow-x:auto;margin-top:8px"><table class="tb"><thead><tr><th>Aviso</th><th>Nro</th><th>Emisión</th><th>Inicio</th><th>Fin</th><th class="num">Duración</th><th>Nivel</th></tr></thead><tbody>${MAV.map(x=>`<tr ${x.vig?`data-mtab="${x.num}"`:""}><td style="min-width:180px">${x.titulo.charAt(0)+x.titulo.slice(1).toLowerCase()}</td><td>${x.num}</td><td>${x.emi.slice(0,5)}</td><td>${x.ini.slice(0,5)}</td><td>${x.fin.slice(0,5)}</td><td class="num">${x.dur} h</td><td>${chipAv(x.nivel)}</td></tr>`).join("")}</tbody></table></div>`)}}
+    const day=Math.min(S.mavi.day,a.dias.length-1),dd=a.dias[day],set=new Set(dd.deps.map(norm));
+    return{legend:`<b>Niveles de peligro</b>${[4,3,2].map(l=>`<span><i style="background:${LVC(l)}"></i>Nivel ${l} · ${LVN[l]}</span>`).join("")}`,
+      map:peru({click:true,fill:d=>set.has(norm(d.n))?LVC(a.nivel):null,aria:`Mapa del aviso ${a.num}, ${dd.f}`}),hint:`${dd.f} · ${dd.deps.length} departamentos`,
+      panel:panelCard("",tabs+`<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-top:12px"><div><div class="eyebrow">Aviso N° ${a.num} · ${a.cod}</div><h3 style="margin:4px 0 0;font-size:15px">${a.titulo}</h3></div>${chipAv(a.nivel)}</div>
+        <dl class="dl" style="margin-top:10px"><dt>Fecha de emisión</dt><dd>${a.emi}</dd><dt>Inicio del evento</dt><dd>${a.ini}</dd><dt>Fin del evento</dt><dd>${a.fin}</dd><dt>Vigencia</dt><dd>${a.dur} horas</dd></dl>
+        <p class="txt" style="margin-top:10px">${a.cuerpo}</p>`)+
+        panelCard(`<h3>Evolución por día</h3>`,`<div class="thumbs">${a.dias.map((x,i)=>{const st=new Set(x.deps.map(norm));return`<button class="thumb ${i===day?"on":""}" data-mday2="${i}">${peru({fill:d=>st.has(norm(d.n))?LVC(a.nivel):null,aria:x.f})}${x.f.split(" ").slice(0,2).join(" ")}</button>`}).join("")}</div>
+        <p class="txt" style="margin-top:10px"><b>${dd.f}.</b> ${dd.t}</p>`)+
+        panelCard(`<h3>Departamentos de posible afectación (${dd.deps.length})</h3>`,`<div class="chips">${dd.deps.map(d=>`<span class="chip ghost">${d}</span>`).join("")}</div>
+        <div class="pr" style="margin-top:12px;--lc:${LVC(a.nivel)}"><div><b>Peligro</b>${NIV_M[a.nivel].p}</div><div><b>Recomendación</b>${NIV_M[a.nivel].r}</div></div>`)}}
+};
+
+let current=null,opener=null;
+function renderDlg(){const k=current,p=PRODS[k],[acc,soft,dn]=DOMV[p.dom],d=DET[k]();const dlg=$("#dlg");const sy=dlg.querySelector(".panel")?.scrollTop;
+  dlg.style.setProperty("--acc",acc);dlg.style.setProperty("--acc-soft",soft);
+  dlg.innerHTML=`<div class="d-h"><div class="container"><div class="ic">${ICON[p.type]}</div><div><div class="eyebrow">${dn} · ${p.upd}</div><h2 id="dlg-t">${p.name}</h2><p>${p.sub}</p></div>
+    <div class="acts">${d.tools||""}<button class="btn" data-act="png">⬇ PNG</button><button class="btn" data-act="pdf">⬇ PDF</button><button class="btn" data-act="share">🔗 Compartir</button><button class="close" data-close aria-label="Cerrar y volver al mosaico" autofocus>✕</button></div></div></div>
+    <div class="container d-b"><div class="d-map">${d.map}${d.legend?`<div class="legend">${d.legend}</div>`:""}${d.hint?`<div class="hint">${d.hint}</div>`:'<div class="hint">Toca un punto para ver su detalle</div>'}</div><div class="panel">${d.panel}</div></div>`;
+}
+function openDlg(k,push=true){if(!PRODS[k])return;current=k;opener=opener||document.activeElement;renderDlg();const dlg=$("#dlg");if(!dlg.open)dlg.showModal();dlg.scrollTop=0;
+  if(push&&location.hash!=="#/"+k)history.pushState(null,"","#/"+k);document.title=PRODS[k].name+" · Portal de Contingencia";}
+function closeDlg(){const dlg=$("#dlg");if(dlg.open)dlg.close();}
+$("#dlg").addEventListener("close",()=>{current=null;document.title="Mosaico de Contingencia";if(location.hash.startsWith("#/")&&location.hash.length>2)history.pushState(null,"","#/");
+  const t=opener&&document.body.contains(opener)?opener:null;opener=null;renderTiles();(t||document.querySelector("[data-open]"))?.focus?.()});
+
+/* =================== Eventos =================== */
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),1600)}
+document.addEventListener("click",e=>{if(e.target.closest("select"))return;
+  const el=e.target.closest("[data-mvar],[data-mday],[data-lay],[data-open],[data-go],[data-close],[data-act],[data-hvar],[data-hagg],[data-sel],[data-hf],[data-av],[data-evar],[data-cap],[data-mtab],[data-mday2],.pt,.dep.click,.tile");
+  if(!el)return;const inDlg=!!el.closest("#dlg"),ds=el.dataset;
+  const rer=()=>inDlg?renderDlg():renderTiles();
+  if(ds.mvar){S.mmon.var=ds.mvar;return rer()}
+  if(ds.mday){S.mpro.day=+ds.mday;return rer()}
+  if(ds.lay){const L=S.lay;L[ds.lay]=!L[ds.lay];if(L[ds.lay]&&ds.lay==="pr")L.avm=false;if(L[ds.lay]&&ds.lay==="avm")L.pr=false;return renderTiles()}
+  if(ds.go){document.getElementById(ds.go).scrollIntoView();return}
+  // mapa central: cada elemento abre el producto que lo origina
+  if(!inDlg&&el.closest(".bigmap")&&(el.classList.contains("pt")||el.classList.contains("dep"))){
+    if(ds.k==="eh"){S.hmon.sel=ds.id;return openDlg("hidro-monitoreo")}
+    if(ds.k==="ah"){S.havi.sel=+ds.id;S.havi.f="todos";return openDlg("hidro-avisos")}
+    if(ds.k==="em"){S.mmon.sel=ds.id;return openDlg("meteo-monitoreo")}
+    if(ds.dep){const k=norm(ds.dep),av=MAV.find(a=>a.vig&&a.deps.some(d=>norm(d)===k));
+      if(S.lay.avm&&av){S.mavi.tab=av.num;S.mavi.day=0;return openDlg("meteo-avisos")}
+      if(S.lay.pr){S.mpro.cap=CAP(ds.dep).cap;return openDlg("meteo-pronostico")}}
+    return}
+  if(ds.close!=null)return closeDlg();
+  if(ds.act){if(ds.act==="share"){navigator.clipboard?.writeText(location.href).then(()=>toast("Enlace copiado"),()=>toast(location.href));}else toast(`Descarga ${ds.act.toUpperCase()}: disponible en la versión final`);return}
+  if(ds.hvar){S.hmon.var=ds.hvar;return renderDlg()}
+  if(ds.hagg){S.hmon.agg=ds.hagg;return renderDlg()}
+  if(ds.hf){S.havi.f=ds.hf;return renderDlg()}
+  if(ds.av){S.havi.sel=+ds.av;return renderDlg()}
+  if(ds.evar){S.mmon.var=ds.evar;return renderDlg()}
+  if(ds.mtab){S.mavi.tab=+ds.mtab;S.mavi.day=0;return renderDlg()}
+  if(ds.mday2){S.mavi.day=+ds.mday2;return renderDlg()}
+  if(ds.cap&&el.tagName==="TR"){S.mpro.cap=ds.cap;return renderDlg()}
+  if(ds.sel||el.classList.contains("pt")){const id=ds.sel||ds.id;if(!inDlg){openFromTile(el);return}
+    if(current==="hidro-monitoreo")S.hmon.sel=id;else if(current==="hidro-pronostico"){if(!HFC[id])return toast("Esta estación no tiene pronóstico cargado");S.hpro.sel=id}
+    else if(current==="hidro-avisos")S.havi.sel=+id;else if(current==="meteo-monitoreo"){const st=EST_METEO.find(x=>x.id===id);S.mmon.sel=id;if(st&&!st.v.includes(S.mmon.var))S.mmon.var=st.v[0]}
+    return renderDlg()}
+  if(el.classList.contains("dep")&&inDlg){const c=CAP(ds.dep);if(current==="meteo-pronostico"&&c){S.mpro.cap=c.cap;renderDlg()}return}
+  if(ds.open){opener=el;return openDlg(ds.open)}
+  if(el.classList.contains("tile"))openFromTile(el);
+});
+function openFromTile(el){const t=el.closest(".tile");if(t){opener=t.querySelector("[data-open]");openDlg(t.dataset.k)}}
+document.addEventListener("change",e=>{const t=e.target;
+  if(t.matches("select[data-cap]")){S.mpro.cap=t.value;renderDlg()}
+  if(t.matches("select[data-est]")){S.mmon.sel=t.value;renderTiles()}
+  if(t.matches("select[data-capt]")){S.mpro.cap=t.value;renderTiles()}});
+window.addEventListener("popstate",route);
+function route(){const k=location.hash.replace(/^#\//,"");if(PRODS[k])openDlg(k,false);else closeDlg()}
+
+$("#theme").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=dark?"light":"dark";try{localStorage.setItem("pc-theme",r.dataset.theme)}catch(e){}};
+try{const t=localStorage.getItem("pc-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+renderTiles();route();
+</script>
+</body>
+</html>

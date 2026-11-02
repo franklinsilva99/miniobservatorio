@@ -1,0 +1,43 @@
+{
+  "contrato": "1.0",
+  "generado": "2026-11-02T21:58:50Z",
+  "productos": [
+    {
+      "id": "meteo-monitoreo",
+      "url": "meteo/monitoreo.json",
+      "emitido": "2026-11-02T16:50:00-05:00",
+      "frecuencia_min": 10
+    },
+    {
+      "id": "meteo-pronostico",
+      "url": "meteo/pronostico.json",
+      "emitido": "2026-11-02T05:00:00-05:00",
+      "frecuencia_min": 720
+    },
+    {
+      "id": "meteo-avisos",
+      "url": "meteo/avisos.json",
+      "emitido": "2026-11-01T10:00:00-05:00",
+      "frecuencia_min": 1440
+    },
+    {
+      "id": "hidro-monitoreo",
+      "url": "hidro/monitoreo.json",
+      "emitido": "2026-11-02T16:50:00-05:00",
+      "frecuencia_min": 10
+    },
+    {
+      "id": "hidro-pronostico",
+      "url": "hidro/pronostico.json",
+      "emitido": "2026-11-02T07:00:00-05:00",
+      "frecuencia_min": 1440
+    },
+    {
+      "id": "hidro-avisos",
+      "url": "hidro/avisos.json",
+      "emitido": "2026-11-02T15:50:00-05:00",
+      "frecuencia_min": 1440
+    }
+  ],
+  "demo": true
+}

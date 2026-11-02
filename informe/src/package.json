@@ -1,0 +1,12 @@
+{
+  "name": "informe-portal-contingencia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generador del informe técnico del Portal de Contingencia (Word .docx). Los SVG de esta carpeta son las fuentes de los diagramas de informe/img/.",
+  "scripts": {
+    "generar": "node generar-informe.js"
+  },
+  "dependencies": {
+    "docx": "9.5.1"
+  }
+}
