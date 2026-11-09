@@ -93,6 +93,7 @@ export function construir(ahora = Date.now()) {
       id: esc(e.id), idOrigen: e.id, n: esc(e.nombre), rio: esc(e.rio || "—"), cuenca: esc(e.cuenca || "—"), reg: esc(e.region_hidrografica || "—"),
       dep: esc(e.departamento || "—"), prov: esc(e.provincia || "—"), dist: escL(e.distritos), pob: escL(e.centros_poblados), x, y,
       tipo: e.tipo_umbral, u: e.umbrales?.caudal || null, un: e.umbrales?.nivel || null, q, niv, fecha: e.actual.fecha,
+      uniN: esc(e.unidad_nivel || "m"),
       vars: e.variables || ["caudal", "nivel"], detalle: e.serie ? null : e.detalle || null, conEstado: !!e.estado,
       serQ: ser?.caudal || [], serN: ser?.nivel || [], serIni: ser?.inicio, paso: ser?.paso_min || 60,
       ...estadoEstacion(e, q, niv, e.tipo_umbral, ahora)

@@ -22,10 +22,12 @@ export function peru({ fill, pts = [], labels = [], click = false, aria = "Mapa 
 }
 
 /** Gráfico de líneas/barras con umbrales, bandas y separación observado/pronóstico. */
-export function chart({ ser, thr = [], bands = [], band = null, split = null, xl = [], h = 190, zero = false, mini = false, aria = "" }) {
+/* incluir: valores que el eje debe abarcar aunque no sean datos (los umbrales de las franjas), para
+   que se vean todos los umbrales como en la web de hidrología y no solo la franja donde cae el dato. */
+export function chart({ ser, thr = [], bands = [], band = null, split = null, xl = [], h = 190, zero = false, mini = false, aria = "", incluir = [] }) {
   const W = 360, H = h, P = mini ? { l: 4, r: 4, t: 6, b: 6 } : { l: 42, r: 12, t: 12, b: 24 };
   const n = Math.max(2, ...ser.map(s => s.v.length));
-  const all = []; ser.forEach(s => s.v.forEach(x => x != null && all.push(x))); thr.forEach(t => all.push(t.v)); if (band) band.forEach(b => b && all.push(b[0], b[1]));
+  const all = []; ser.forEach(s => s.v.forEach(x => x != null && all.push(x))); thr.forEach(t => all.push(t.v)); incluir.forEach(v => v != null && all.push(v)); if (band) band.forEach(b => b && all.push(b[0], b[1]));
   if (!all.length) return `<p class="muted" style="font-size:12.5px;margin:0">Sin datos para graficar.</p>`;
   let mn = Math.min(...all), mx = Math.max(...all); const pad = (mx - mn) * .14 || 1; mn -= pad; mx += pad; if (zero) mn = 0;
   const X = i => P.l + i * (W - P.l - P.r) / (n - 1), Y = v => P.t + (mx - v) * (H - P.t - P.b) / (mx - mn), dec = mx - mn < 8 ? 1 : 0;

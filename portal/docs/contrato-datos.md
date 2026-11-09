@@ -162,6 +162,7 @@ Las referencias a «obligatorio: no» indican que el campo puede omitirse.
 | `rio`, `cuenca`, `region_hidrografica`, `departamento`, `provincia`, `distritos`, `centros_poblados` | no | Ubicación; su falta no impide mostrar la estación. |
 | `variables` | no | `caudal` y/o `nivel`: las que publica la estación. |
 | `actual.caudal`, `actual.nivel` | no | Último valor, o `null` si no hay. Una estación puede tener solo nivel. |
+| `unidad_nivel` | no | Unidad del nivel, de sus umbrales y de su serie: `m.s.n.m.` si el productor ya sumó la cota de la estación, como la muestra hidrología; si falta, `m` (nivel relativo). |
 | `estado` | no | `sin_datos`, `normal`, `moderada`, `fuerte` o `extrema`. **Si se envía, manda**, para que el portal coincida con el sistema productor. Si no, el portal lo calcula con los umbrales. |
 | `umbrales` | no | Por variable, los 3 valores en orden. Sin umbrales, no se dibujan líneas de umbral. |
 | `detalle` | no | Ruta a un archivo con la serie, relativa a este producto. El portal lo baja **solo al abrir la estación**. Se recomienda frente a `serie` a partir de unas decenas de estaciones. |
@@ -208,7 +209,7 @@ Cada modelo debe tener una posición por cada fecha de `pronostico.fechas`, con 
 } ] }
 ```
 
-`serie`, `descripcion`, `peligro`, `recomendacion`, `plazo`, `tendencia`, `estado` y `documento` son opcionales, y `valor` admite `null`. En `estacion` solo son obligatorios `id` y `nombre`: un aviso sin coordenadas o sin umbrales se muestra igual, fuera del mapa, porque ocultar un aviso es peor que no ubicarlo.
+`serie`, `descripcion`, `peligro`, `recomendacion`, `plazo`, `tendencia`, `estado` y `documento` son opcionales, y `valor` admite `null`. `valor`, `serie` y `estacion.umbrales` van en `unidad` (para nivel, `m.s.n.m.` si llevan la cota de la estación, o `m`). En `estacion` solo son obligatorios `id` y `nombre`: un aviso sin coordenadas o sin umbrales se muestra igual, fuera del mapa, porque ocultar un aviso es peor que no ubicarlo.
 
 ## 4. Procedimiento de publicación (obligatorio)
 

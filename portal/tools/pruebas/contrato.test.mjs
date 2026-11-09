@@ -25,6 +25,17 @@ test("una estación solo con nivel es válida", () => {
   assert.equal(r.omitidos.length, 0);
 });
 
+test("la unidad del nivel es opcional: con cota va en m.s.n.m.; sin ella el portal usa m", () => {
+  const r = validarProducto("hidro-monitoreo", monitoreo([
+    estacion("a", { variables: ["nivel"], unidad_nivel: "m.s.n.m.", umbrales: { nivel: [123.94, 123.09, 122.06] }, tipo_umbral: "vaciante", actual: { fecha: ahora, nivel: 122.4 } }),
+    estacion("b")
+  ]));
+  assert.equal(r.ok, true);
+  assert.equal(r.omitidos.length, 0);
+  const mala = validarProducto("hidro-monitoreo", monitoreo([estacion("a", { unidad_nivel: 5 }), ...estaciones(9)]));
+  assert.equal(mala.omitidos.length, 1);
+});
+
 test("un elemento mal armado se omite y los demás se conservan", () => {
   const lista = estaciones(10);
   delete lista[3].nombre;

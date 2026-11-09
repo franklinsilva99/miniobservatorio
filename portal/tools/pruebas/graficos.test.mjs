@@ -26,6 +26,14 @@ test("un hueco mayor que el permitido queda cortado", () => {
   assert.equal(puntos(svg), 0);
 });
 
+test("el eje abarca los umbrales pedidos aunque el dato esté lejos de ellos", () => {
+  const etiquetas = svg => [...svg.matchAll(/text-anchor="end" font-size="9"[^>]*>([^<]+)</g)].map(m => +m[1].replace(",", "."));
+  const solo = etiquetas(chart({ ser: [{ v: [122.2, 122.4], c: "#00f" }] }));
+  const con = etiquetas(chart({ ser: [{ v: [122.2, 122.4], c: "#00f" }], incluir: [123.94, 123.09, 122.06] }));
+  assert.ok(Math.max(...solo) < 123);
+  assert.ok(Math.max(...con) > 123.94 && Math.min(...con) < 122.06);
+});
+
 test("los datos seguidos siguen dibujándose igual que antes", () => {
   const svg = chart({ ser: [{ v: [1, 2, null, 3, 4], c: "#00f" }] });
   assert.equal(tramos(svg), 2);

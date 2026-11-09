@@ -83,6 +83,8 @@ const PRODUCTO = {
       id: str, nombre: str, cuenca: opt(str), region_hidrografica: opt(str), ...zona, ...coord,
       tipo_umbral: en("avenida", "vaciante"),
       variables: opt(arr(en("caudal", "nivel"), { min: 1 })),
+      /* Unidad del nivel, de su umbral y de su serie: "m.s.n.m." si lleva la cota de la estación. Sin ella, "m". */
+      unidad_nivel: opt(str),
       estado: opt(en(...Object.keys(ESTADOS))),
       umbrales: opt(obj({ caudal: opt(umbrales3), nivel: opt(umbrales3) })),
       actual: obj({ fecha: nul(iso), caudal: opt(nul(num)), nivel: opt(nul(num)) }),

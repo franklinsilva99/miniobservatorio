@@ -114,7 +114,7 @@ export const BENTO = {
     const sob = M.HST.filter(s => s.s >= 2), top = [...M.HST].sort((a, b) => b.s - a.s || (b.q || 0) - (a.q || 0)).slice(0, 3);
     return tile(K, "a-mh", `
       <div style="display:flex;gap:12px;align-items:center"><div class="big">${sob.length}<small>de ${M.HST.length}</small></div><div style="font-size:12.5px">estaciones con nivel de peligro</div></div>
-      <ul class="mini">${top.map(s => `<li><span class="sw" style="background:${LVC(s.s)}"></span><span class="nm">${s.n}<small>Río ${s.rio}</small></span><b class="num">${s.q != null ? fmt(s.q) + " m³/s" : s.niv != null ? fmt(s.niv, 2) + " m" : "—"}</b></li>`).join("")}</ul>${legLv(UML)}`);
+      <ul class="mini">${top.map(s => `<li><span class="sw" style="background:${LVC(s.s)}"></span><span class="nm">${s.n}<small>Río ${s.rio}</small></span><b class="num">${s.q != null ? fmt(s.q) + " m³/s" : s.niv != null ? fmt(s.niv, 2) + " " + s.uniN : "—"}</b></li>`).join("")}</ul>${legLv(UML)}`);
   },
 
   ph: () => {
