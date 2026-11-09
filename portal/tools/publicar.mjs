@@ -22,6 +22,7 @@ for (const a of arch) {
     const json = leerJSON(a);
     const ent = publicar(repo, json, { frecuencia_min: frecuencia });
     console.log(`✔ ${ent.id} publicado en ${path.join(repo, ent.url)} (emitido ${ent.emitido})`);
+    ent.omitidos.forEach(o => console.warn(`! elemento omitido (${o.id ?? "índice " + o.indice}):\n  · ${o.errores.join("\n  · ")}`));
   } catch (e) { fallos++; console.error(`✘ ${a}\n  ${e.message}`); }
 }
 process.exit(fallos ? 1 : 0);

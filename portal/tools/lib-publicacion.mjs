@@ -16,7 +16,7 @@ import { validarProducto, validarManifiesto, VERSION_CONTRATO, PRODUCTOS } from 
 /** Ruta por defecto de cada producto dentro del repositorio. */
 export const RUTA = Object.fromEntries(PRODUCTOS.map(id => { const [dom, tipo] = id.split("-"); return [id, `${dom}/${tipo}.json`]; }));
 /** Frecuencia de emisión esperada (min). Sirve para detectar productos desactualizados. */
-export const FRECUENCIA = { "meteo-monitoreo": 10, "hidro-monitoreo": 10, "meteo-pronostico": 720, "hidro-pronostico": 1440, "meteo-avisos": 1440, "hidro-avisos": 1440 };
+export const FRECUENCIA = { "meteo-monitoreo": 10, "hidro-monitoreo": 60, "meteo-pronostico": 720, "hidro-pronostico": 1440, "meteo-avisos": 1440, "hidro-avisos": 1440 };
 
 /** Lee un JSON tolerando la marca BOM que agregan algunas herramientas de Windows. */
 export const leerJSON = f => JSON.parse(fs.readFileSync(f, "utf8").replace(/^﻿/, ""));
@@ -40,9 +40,11 @@ function escribirAtomico(destino, texto) {
 export function publicar(repoDir, json, { frecuencia_min, demo } = {}) {
   const id = json?.producto, r = validarProducto(id, json);
   if (!r.ok) { const e = new Error(`El producto «${id}» no cumple el contrato:\n  · ${r.errores.join("\n  · ")}`); e.errores = r.errores; throw e; }
+  /* Se publica sin los elementos con errores, dejando constancia de cuántos faltan. */
+  const salida = r.omitidos.length ? { ...r.json, omitidos: (json.omitidos || 0) + r.omitidos.length } : json;
 
   const url = RUTA[id];
-  escribirAtomico(path.join(repoDir, url), aJSON(json));
+  escribirAtomico(path.join(repoDir, url), aJSON(salida));
 
   const mPath = path.join(repoDir, "manifest.json");
   let man = { contrato: VERSION_CONTRATO, generado: json.emitido, productos: [] };
@@ -58,5 +60,5 @@ export function publicar(repoDir, json, { frecuencia_min, demo } = {}) {
   const vm = validarManifiesto(man);
   if (!vm.ok) throw new Error("Manifiesto resultante inválido: " + vm.errores.join("; "));
   escribirAtomico(mPath, aJSON(man));
-  return ent;
+  return { ...ent, omitidos: r.omitidos };
 }

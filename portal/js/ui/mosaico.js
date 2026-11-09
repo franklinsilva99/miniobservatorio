@@ -17,8 +17,13 @@ function pie(k) {
   return `<div class="t-f"><span>Fuente: ${M.fuente[k]}</span><span class="live" style="--dot:${SALUD_C[h.nivel]}" title="${esc(h.texto)}">${emision(k)}</span></div>`;
 }
 function aviso(k) {
-  const h = salud(k);
-  return ["ok", "cargando", "verificando"].includes(h.nivel) ? "" : `<div class="t-warn" style="--wc:${SALUD_C[h.nivel]}">${esc(h.texto)}</div>`;
+  const h = salud(k), n = repo.productos[k].omitidos, esAviso = k.endsWith("-avisos");
+  const salidaH = ["ok", "cargando", "verificando"].includes(h.nivel) ? "" : `<div class="t-warn" style="--wc:${SALUD_C[h.nivel]}">${esc(h.texto)}</div>`;
+  if (!n) return salidaH;
+  /* Un aviso que no se puede mostrar es más grave que una estación: se indica adónde acudir. */
+  const texto = esAviso ? `${n} aviso${n > 1 ? "s" : ""} no se pudo mostrar. Consulte los canales oficiales del SENAMHI.`
+    : `${n} elemento${n > 1 ? "s" : ""} no disponible${n > 1 ? "s" : ""} en esta emisión.`;
+  return `${salidaH}<div class="t-warn" style="--wc:${esAviso ? "var(--l4)" : "var(--l3)"}">${texto}</div>`;
 }
 
 function tile(k, cls, body, { tools = "", hero = false, style = "" } = {}) {
@@ -55,8 +60,8 @@ export const BENTO = {
     const L = S.lay, m = M.ok["meteo-avisos"] ? nivelDep() : {}, k = S.mmon.var, pts = [], d = S.mpro.day ?? M.diaHoyPr, okL = id => M.ok[LAYERS.find(x => x[0] === id)[2]];
     const on = id => L[id] && okL(id);
     if (on("em")) M.EST.forEach(e => { const has = e.v.includes(k) && M.valor(e, k) != null; pts.push({ k: "em", id: e.id, x: e.x, y: e.y, r: has ? 4.5 : 3.2, off: !has, c: has ? vcol(k, M.valor(e, k)) : "", t: `${e.n} · ${has ? fmt(M.valor(e, k), VARS[k].d) + " " + VARS[k].u : "sin dato de " + VARS[k].n.toLowerCase()}` }); });
-    if (on("eh")) M.HST.forEach(s => pts.push({ k: "eh", sh: "d", id: s.id, x: s.x, y: s.y, r: 5, c: LVC(s.s), t: `Estación hidrológica ${s.n} · río ${s.rio} · ${LVN[s.s]}` }));
-    if (on("avh")) M.HAV.filter(a => a.vig).forEach(a => pts.push({ k: "ah", sh: "ring", id: a.nro, x: a.s.x, y: a.s.y, r: 11, c: LVC(a.nivel), t: `Aviso hidrológico N° ${a.nro} · ${a.s.n} · ${LVN[a.nivel]}` }));
+    if (on("eh")) M.HST.forEach(s => pts.push({ k: "eh", sh: "d", id: s.id, x: s.x, y: s.y, r: M.HST.length > 40 ? 3 : 5, c: LVC(s.s), t: `Estación hidrológica ${s.n} · río ${s.rio} · ${LVN[s.s]}` }));
+    if (on("avh")) M.HAV.filter(a => a.vig && a.s.x != null).forEach(a => pts.push({ k: "ah", sh: "ring", id: a.nro, x: a.s.x, y: a.s.y, r: 11, c: LVC(a.nivel), t: `Aviso hidrológico N° ${a.nro} · ${a.s.n} · ${LVN[a.nivel]}` }));
     const pr = on("pr") && M.CAPS.length;
     const fill = dp => on("avm") && m[norm(dp.n)] ? LVC(m[norm(dp.n)]) : pr && M.CAP(dp.n) ? vcol("T", M.CAP(dp.n).d[d]?.mx) : null;
     const labels = pr ? DEPS.filter(dp => dp.n !== "Callao" && M.CAP(dp.n)?.d[d]).map(dp => { const x = M.CAP(dp.n).d[d]; return { x: dp.cx, y: dp.cy + 3, t: `${x.e || ""}${fmt(x.mx)}°`, fs: 8 }; }) : [];
@@ -109,7 +114,7 @@ export const BENTO = {
     const sob = M.HST.filter(s => s.s >= 2), top = [...M.HST].sort((a, b) => b.s - a.s || (b.q || 0) - (a.q || 0)).slice(0, 3);
     return tile(K, "a-mh", `
       <div style="display:flex;gap:12px;align-items:center"><div class="big">${sob.length}<small>de ${M.HST.length}</small></div><div style="font-size:12.5px">estaciones con nivel de peligro</div></div>
-      <ul class="mini">${top.map(s => `<li><span class="sw" style="background:${LVC(s.s)}"></span><span class="nm">${s.n}<small>Río ${s.rio}</small></span><b class="num">${s.q == null ? "—" : fmt(s.q) + " m³/s"}</b></li>`).join("")}</ul>${legLv(UML)}`);
+      <ul class="mini">${top.map(s => `<li><span class="sw" style="background:${LVC(s.s)}"></span><span class="nm">${s.n}<small>Río ${s.rio}</small></span><b class="num">${s.q != null ? fmt(s.q) + " m³/s" : s.niv != null ? fmt(s.niv, 2) + " m" : "—"}</b></li>`).join("")}</ul>${legLv(UML)}`);
   },
 
   ph: () => {
@@ -119,7 +124,7 @@ export const BENTO = {
     return tile(K, "a-ph", `
       <div style="display:flex;gap:12px;align-items:center"><div class="big">${c}<small>de ${ids.length}</small></div><div style="font-size:12.5px">estaciones con pronóstico sobre umbral</div></div>
       <div style="font-size:12.5px"><b>${s.n}</b> · río ${s.rio} · ${f.lblPico.split(" ")[0]} ${fmt(f.pico)} m³/s el ${f.dpico} ${chipUm(f.s)}</div>
-      ${chart({ ...sp, xl: [], thr: [{ v: s.u[0], c: LVC(2), l: "" }, { v: s.u[1], c: LVC(3), l: "" }], h: 110, mini: true, aria: `Mini hidrograma pronosticado de ${s.n}` })}
+      ${chart({ ...sp, xl: [], thr: s.u ? [{ v: s.u[0], c: LVC(2), l: "" }, { v: s.u[1], c: LVC(3), l: "" }] : [], h: 110, mini: true, aria: `Mini hidrograma pronosticado de ${s.n}` })}
       <div class="chart-leg">${legItem("var(--acc)", "Observado")}${legItem("var(--acc)", "Pronóstico", 1)}</div>`);
   },
 

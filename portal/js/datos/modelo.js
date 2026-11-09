@@ -6,17 +6,37 @@
      modelos, acumulados 24 h) se hacen aquí; las vistas solo dibujan.
    ===================================================================== */
 import { proj } from "../geo/peru.js";
-import { NIVELES, VARIABLES_METEO } from "./contrato.js";
-import { repo } from "./repositorio.js";
+import { CONFIG } from "../config.js";
+import { NIVELES, ESTADOS, VARIABLES_METEO } from "./contrato.js";
+import { repo, detalleDe } from "./repositorio.js";
 import { esc, norm, dm, dmhm, dmyhm, fechaLima, fechaLarga, etiquetaDia } from "../ui/util.js";
 
 /** Modelo vigente (se reconstruye cada vez que llega un producto). */
 export const M = {};
 
 /** Estado por umbral: 1 normal · 2 moderada · 3 fuerte · 4 extrema · 0 sin datos. */
-export const estadoUmbral = (v, u, tipo) => v == null ? 0 : tipo === "vaciante"
+export const estadoUmbral = (v, u, tipo) => v == null ? 0 : !u ? 1 : tipo === "vaciante"
   ? (v <= u[2] ? 4 : v <= u[1] ? 3 : v <= u[0] ? 2 : 1)
   : (v >= u[2] ? 4 : v >= u[1] ? 3 : v >= u[0] ? 2 : 1);
+
+/**
+ * Estado de una estación de monitoreo: el que envía el productor o, si no lo envía, el de sus
+ * umbrales. Un dato viejo no dice cómo está hoy el río, salvo que la estación tenga un aviso activo.
+ */
+function estadoEstacion(e, q, niv, tipo, ahora) {
+  const sinUmbralCaudal = q == null || !e.umbrales?.caudal;
+  const base = e.estado ? ESTADOS[e.estado]
+    : sinUmbralCaudal ? estadoUmbral(niv, e.umbrales?.nivel, tipo) || estadoUmbral(q, null, tipo)
+      : estadoUmbral(q, e.umbrales.caudal, tipo);
+  const viejo = (q != null || niv != null) && e.actual.fecha != null && ahora - ms(e.actual.fecha) > CONFIG.horas_sin_datos * 3600000;
+  return { s: viejo && base <= 1 ? 0 : base, viejo };
+}
+
+/** Promedio, mínimo y máximo de los modelos que tienen valor; null si ninguno lo tiene. */
+const resumenModelos = d => {
+  const v = d.filter(x => x != null);
+  return v.length ? { avg: +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(1), min: Math.min(...v), max: Math.max(...v) } : { avg: null, min: null, max: null };
+};
 
 /* Textos genéricos de respaldo cuando el aviso no trae peligro/recomendación propios */
 const PELIGRO_H = {
@@ -67,13 +87,15 @@ export function construir(ahora = Date.now()) {
 
   /* ---- hidro-monitoreo ---- */
   M.HST = (D("hidro-monitoreo")?.estaciones || []).map(e => {
-    const [x, y] = xy(e.lat, e.lon), u = e.umbrales.caudal;
+    const [x, y] = xy(e.lat, e.lon), q = e.actual.caudal ?? null, niv = e.actual.nivel ?? null;
+    const ser = detalleDe("hidro-monitoreo", e.id)?.serie || e.serie;
     return {
-      id: esc(e.id), n: esc(e.nombre), rio: esc(e.rio), cuenca: esc(e.cuenca), reg: esc(e.region_hidrografica || "—"),
-      dep: esc(e.departamento), prov: esc(e.provincia), dist: escL(e.distritos), pob: escL(e.centros_poblados), x, y,
-      tipo: e.tipo_umbral, u, un: e.umbrales.nivel || null, q: e.actual.caudal, niv: e.actual.nivel ?? null, fecha: e.actual.fecha,
-      serQ: e.serie?.caudal || [], serN: e.serie?.nivel || [], serIni: e.serie?.inicio, paso: e.serie?.paso_min || 60,
-      s: estadoUmbral(e.actual.caudal, u, e.tipo_umbral)
+      id: esc(e.id), idOrigen: e.id, n: esc(e.nombre), rio: esc(e.rio || "—"), cuenca: esc(e.cuenca || "—"), reg: esc(e.region_hidrografica || "—"),
+      dep: esc(e.departamento || "—"), prov: esc(e.provincia || "—"), dist: escL(e.distritos), pob: escL(e.centros_poblados), x, y,
+      tipo: e.tipo_umbral, u: e.umbrales?.caudal || null, un: e.umbrales?.nivel || null, q, niv, fecha: e.actual.fecha,
+      vars: e.variables || ["caudal", "nivel"], detalle: e.serie ? null : e.detalle || null, conEstado: !!e.estado,
+      serQ: ser?.caudal || [], serN: ser?.nivel || [], serIni: ser?.inicio, paso: ser?.paso_min || 60,
+      ...estadoEstacion(e, q, niv, e.tipo_umbral, ahora)
     };
   });
   M.HS = id => M.HST.find(s => s.id === id);
@@ -83,28 +105,28 @@ export function construir(ahora = Date.now()) {
   (D("hidro-pronostico")?.estaciones || []).forEach(e => {
     const [x, y] = xy(e.lat, e.lon), P = e.pronostico, nD = P.fechas.length;
     const m = Array.from({ length: nD }, (_, d) => P.modelos.map(mo => mo.caudal[d]));
-    const avg = m.map(d => +(d.reduce((a, b) => a + b, 0) / d.length).toFixed(1));
-    const vac = e.tipo_umbral === "vaciante", crit = vac ? Math.min(...avg) : Math.max(...avg);
-    const st = { id: esc(e.id), n: esc(e.nombre), rio: esc(e.rio), dep: esc(e.departamento), x, y, u: e.umbrales_caudal, tipo: e.tipo_umbral };
+    const res = m.map(resumenModelos), avg = res.map(r => r.avg), conValor = avg.filter(v => v != null);
+    const vac = e.tipo_umbral === "vaciante", crit = !conValor.length ? null : vac ? Math.min(...conValor) : Math.max(...conValor);
+    const st = { id: esc(e.id), n: esc(e.nombre), rio: esc(e.rio || "—"), dep: esc(e.departamento || "—"), x, y, u: e.umbrales_caudal || null, tipo: e.tipo_umbral };
     M.HFC[st.id] = {
-      st, m, modelos: P.modelos.map(x => esc(x.nombre)), obs: e.observado.caudal, fObs: e.observado.fechas.map(dm), fFc: P.fechas.map(dm),
-      avg, min: m.map(d => Math.min(...d)), max: m.map(d => Math.max(...d)),
-      pico: crit, lblPico: vac ? "mínimo esperado" : "pico esperado", dpico: dm(P.fechas[avg.indexOf(crit)]), s: estadoUmbral(crit, st.u, st.tipo)
+      st, m, modelos: P.modelos.map(x => esc(x.nombre)), obs: e.observado?.caudal || [], fObs: (e.observado?.fechas || []).map(dm), fFc: P.fechas.map(dm),
+      avg, min: res.map(r => r.min), max: res.map(r => r.max),
+      pico: crit, lblPico: vac ? "mínimo esperado" : "pico esperado", dpico: crit == null ? "—" : dm(P.fechas[avg.indexOf(crit)]), s: estadoUmbral(crit, st.u, st.tipo)
     };
   });
 
   /* ---- hidro-avisos ---- */
   M.HAV = (D("hidro-avisos")?.avisos || []).map(a => {
-    const e = a.estacion, [x, y] = xy(e.lat, e.lon), nv = NIVELES[a.nivel];
+    const e = a.estacion, [x, y] = e.lat != null && e.lon != null ? xy(e.lat, e.lon) : [null, null], nv = NIVELES[a.nivel];
     return {
       nro: a.numero, nivel: nv, tipo: a.tipo, plazo: esc(a.plazo || "—"), emitido: a.emitido,
       ini: dmhm(a.inicio), vence: dmhm(a.fin), dur: a.duracion_h,
       vig: a.estado !== "cancelado" && ms(a.fin) >= ahora, cancelado: a.estado === "cancelado",
       var: a.variable, val: a.valor, uni: esc(a.unidad), tend: a.tendencia,
-      titulo: esc(a.titulo), desc: esc(a.descripcion),
+      titulo: esc(a.titulo), desc: esc(a.descripcion || ""),
       peligro: esc(a.peligro || PELIGRO_H[a.tipo][nv]), recom: esc(a.recomendacion || RECOM_H[a.tipo][nv]),
       doc: a.documento || null, serie: a.serie?.valores || null,
-      s: { id: esc(e.id), n: esc(e.nombre), rio: esc(e.rio), dep: esc(e.departamento), prov: esc(e.provincia), dist: escL(e.distritos), pob: escL(e.centros_poblados), x, y, u: e.umbrales }
+      s: { id: esc(e.id), n: esc(e.nombre), rio: esc(e.rio || "—"), dep: esc(e.departamento || "—"), prov: esc(e.provincia || "—"), dist: escL(e.distritos), pob: escL(e.centros_poblados), x, y, u: e.umbrales || null }
     };
   }).sort((a, b) => (b.vig - a.vig) || (a.vig ? b.nivel - a.nivel : 0) || b.nro - a.nro);
 

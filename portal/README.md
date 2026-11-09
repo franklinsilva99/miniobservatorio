@@ -2,7 +2,7 @@
 
 **Sistema Informático para el apoyo a la Continuidad Operativa del SENAMHI**, Fase 1, Módulo 4: versión minimalista del Portal de Contingencia (monitoreo, pronósticos y avisos).
 
-**Área usuaria:** Unidad de Comunicaciones · **Versión:** 1.0 · **Contrato de datos:** 1.0 · **Fecha:** noviembre de 2026
+**Área usuaria:** Unidad de Comunicaciones · **Versión:** 1.1 · **Contrato de datos:** 1.1 · **Fecha:** noviembre de 2026
 
 ## Qué es
 
@@ -11,7 +11,7 @@ Es un canal alterno de difusión que muestra en **un solo mosaico** los seis pro
 El portal **no genera productos**. Los sistemas productores publican archivos JSON en un **repositorio de productos**, y el portal los **recibe, valida y muestra**. Si un sistema falla, el portal sigue mostrando la última versión válida e informa la incidencia.
 
 ```
-Sistemas productores ──publican──▶ Repositorio (manifest.json + 6 JSON) ◀──lee cada 60 s── Portal
+Sistemas productores ──publican──▶ Repositorio (manifiestos + 6 JSON) ◀──lee cada 5 min── Portal
 ```
 
 ## Alcance de esta versión
@@ -20,7 +20,7 @@ Sistemas productores ──publican──▶ Repositorio (manifest.json + 6 JSON
 |---|---|
 | Frontend completo del mosaico y de las 6 vistas ampliadas | Integración real con los sistemas productores |
 | Recepción de productos: manifiesto, validación, rechazo, copia local y estados | Logotipos oficiales y datos de contacto definitivos |
-| Contrato de datos 1.0 con validador automático | Exportación de PNG y PDF desde el portal |
+| Contrato de datos 1.1 con validador automático | Exportación de PNG y PDF desde el portal |
 | Herramientas para publicar y validar (productores) | Despliegue en la infraestructura del SENAMHI |
 | Repositorio de **demostración** con datos de ejemplo de las PoC | |
 
@@ -43,7 +43,9 @@ Si el puerto está ocupado, se puede usar otro, por ejemplo `node tools/servidor
 
 > **Conviene ejecutar el paso 1 antes de cada demostración.** Si los productos tienen días de antigüedad, el portal los marcará como «desactualizados» y los avisos aparecerán vencidos. Así es como debe comportarse.
 
-Para una demostración larga se puede usar `node tools/generar-ejemplos.mjs --continuo` en otra terminal. Vuelve a publicar cada 10 minutos, como los sistemas reales, y el portal muestra los datos nuevos en menos de 1 minuto.
+Para una demostración larga se puede usar `node tools/generar-ejemplos.mjs --continuo` en otra terminal. Vuelve a publicar cada 10 minutos, y el portal muestra los datos nuevos en unos 6 minutos como máximo.
+
+Las pruebas automáticas se ejecutan con `node --test "tools/pruebas/*.test.mjs"` (Node 22 o superior).
 
 El portal **no funciona abriendo `index.html` con doble clic** (`file://`), porque el navegador bloquea la lectura de los JSON. Hay que servirlo por HTTP.
 
@@ -94,7 +96,10 @@ portal/
 | Clave | Por defecto | Descripción |
 |---|---|---|
 | `repositorio` | `"productos/"` | URL del repositorio. Si es otro dominio, ese servidor debe enviar la cabecera CORS. |
-| `intervalo_s` | `60` | Frecuencia de consulta del manifiesto, en segundos. |
+| `manifiestos` | `["manifest.json"]` | Manifiestos a consultar, relativos al repositorio. Cada sistema productor puede tener el suyo. |
+| `intervalo_s` | `300` | Frecuencia de consulta de los manifiestos, en segundos. |
+| `dispersion_s` | `60` | Espera máxima al azar antes de bajar una emisión nueva. La primera carga no espera. |
+| `horas_sin_datos` | `24` | A partir de estas horas, una estación sin aviso activo se muestra como «sin datos recientes». |
 | `timeout_ms` | `10000` | Tiempo máximo de cada descarga. |
 | `tolerancia` | `2` | Un producto está desactualizado si su antigüedad supera `frecuencia_min × tolerancia`. |
 | `institucion.contacto` | por confirmar | Texto del pie de página. |

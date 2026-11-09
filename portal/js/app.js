@@ -25,7 +25,7 @@ function renderBanner() {
   const malos = Object.keys(PRODS).filter(k => !["ok", "cargando", "verificando"].includes(salud(k).nivel));
   let msg = "";
   const hayDatos = Object.values(repo.productos).some(p => p.json);
-  if (repo.conexion === "sin_conexion") msg = `${ICON.off}<span><b>Sin conexión con el repositorio de productos.</b> ${hayDatos ? "Se muestra la última información recibida" : "Aún no se ha recibido ningún producto en este dispositivo"}; el portal reintentará cada ${CONFIG.intervalo_s} s.</span>`;
+  if (repo.conexion === "sin_conexion") msg = `${ICON.off}<span><b>Sin conexión con el repositorio de productos.</b> ${hayDatos ? "Se muestra la última información recibida" : "Aún no se ha recibido ningún producto en este dispositivo"}; el portal reintentará cada ${Math.max(1, Math.round(CONFIG.intervalo_s / 60))} min.</span>`;
   else if (repo.conexion === "error") msg = `<span><b>El repositorio de productos respondió con un error.</b> ${esc(repo.errorManifiesto || "")}</span>`;
   else if (malos.length) msg = `<span><b>${malos.length} producto${malos.length > 1 ? "s" : ""} con incidencias:</b> ${malos.map(k => `${PRODS[k].name} (${esc(salud(k).texto.split(" · ")[0].toLowerCase())})`).join(", ")}.</span>`;
   b.innerHTML = msg ? `<div class="container">${msg}</div>` : ""; b.hidden = !msg;
@@ -134,10 +134,10 @@ $("#contacto").textContent = CONFIG.institucion.contacto;
 
 /* ---------- ciclo de actualización ---------- */
 let enCurso = false;
-async function ciclo() {
+async function ciclo({ repartir = true } = {}) {
   if (enCurso) return; enCurso = true;
   try {
-    const cambio = await actualizar();
+    const cambio = await actualizar({ repartir });
     if (cambio) { construir(); rerender(); if (!current) route(); }
     else renderBanner();
   } finally { enCurso = false; }
@@ -145,12 +145,15 @@ async function ciclo() {
 
 iniciarRepositorio();      // 1. copia local (instantáneo, funciona sin red)
 construir(); renderTiles();
-await ciclo();             // 2. repositorio
+await ciclo({ repartir: false }); // 2. repositorio: la primera carga no espera
 route();
-setInterval(ciclo, CONFIG.intervalo_s * 1000);
+/* Una pestaña oculta no consulta: al volver a ella se pone al día. */
+setInterval(() => { if (!document.hidden) ciclo(); }, CONFIG.intervalo_s * 1000);
 setInterval(tick, 30000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) ciclo(); });
-window.addEventListener("online", ciclo);
+window.addEventListener("online", () => ciclo());
+/* Llegó la serie de la estación abierta */
+window.addEventListener("pc:detalle", () => { construir(); if (current) renderDlg(); });
 /* Reconstruye la vigencia de avisos y la antigüedad aunque no lleguen productos nuevos */
 setInterval(() => { construir(); if (!current) renderTiles(); }, 5 * 60000);
 

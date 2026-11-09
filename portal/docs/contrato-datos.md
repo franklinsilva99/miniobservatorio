@@ -1,4 +1,4 @@
-# Contrato de datos 1.0: productos del Portal de Contingencia
+# Contrato de datos 1.1: productos del Portal de Contingencia
 
 Este documento define **qué archivos debe publicar cada sistema productor** para que el Portal de Contingencia los muestre. Es el único punto de acuerdo entre los sistemas: el portal no depende de su tecnología, base de datos ni API.
 
@@ -15,9 +15,20 @@ Este documento define **qué archivos debe publicar cada sistema productor** par
 | Coordenadas | `lat` y `lon` en grados decimales WGS84 (el Perú tiene latitud y longitud negativas). **No usar UTM.** |
 | Niveles de peligro | `"moderada"`, `"fuerte"` o `"extrema"` (nomenclatura del Observatorio). |
 | Umbrales | Lista de 3 valores en orden `[moderada, fuerte, extrema]`. En **avenida** son crecientes y en **vaciante**, decrecientes. |
-| Valores faltantes | `null` (por ejemplo, un sensor que no transmitió). No usar `-999`, `""` ni `0`. |
+| Valores faltantes | `null` (por ejemplo, un sensor que no transmitió). No usar `-999`, `""` ni `0`. Una estación sin datos **no es un error**: se publica con `null` y se muestra en gris. |
 | Textos | Texto plano, sin HTML. El portal escapa todo texto. |
 | Autocontenido | Cada producto incluye todo lo que necesita para mostrarse (nombre, coordenadas y umbrales de sus estaciones). Si falta otro producto, este debe seguir funcionando. |
+| Valores creíbles | El contrato revisa el formato, no si el valor es verosímil. Un `9999` es un número válido: el control de valores fuera de rango es responsabilidad del productor, antes de publicar. |
+
+### 1.1 Qué pasa si un archivo tiene errores
+
+| Qué falla | Resultado |
+|---|---|
+| El archivo: JSON dañado, versión mayor incompatible o estructura general incorrecta | Se rechaza completo y se conserva la versión anterior. |
+| Un elemento: una estación, ciudad o aviso mal armado | Se omite solo ese elemento y se muestran los demás, indicando cuántos faltan. |
+| Más del 20 % de los elementos (siempre se tolera uno) | Se rechaza completo: probablemente es un error general de publicación. |
+
+El productor debería excluir antes de publicar lo que no cumpla y declarar cuántos excluyó en el campo opcional `omitidos` (entero, en el sobre). **Un aviso excluido debe generar una alerta en el sistema productor**, porque ocultar un aviso es más grave que ocultar una estación.
 
 ## 2. Estructura del repositorio
 
@@ -31,6 +42,8 @@ productos/
 ├── hidro/pronostico.json
 └── hidro/avisos.json
 ```
+
+Cada sistema productor puede publicar **su propio manifiesto** (`hidro/manifest.json`, con rutas relativas a esa carpeta) para que dos sistemas no se pisen al escribir el mismo archivo y la caída de uno no afecte al otro. El portal consulta los que indique `manifiestos` en `js/config.js`; si dos declaran un mismo producto, manda el primero de la lista. El `manifest.json` de la raíz sigue siendo válido.
 
 ### 2.1 `manifest.json`
 
@@ -67,7 +80,7 @@ productos/
 }
 ```
 
-`producto` debe coincidir con el `id` del manifiesto. `fuente` se muestra al pie de la tarjeta. El contenido de `datos` depende del producto.
+`producto` debe coincidir con el `id` del manifiesto. `fuente` se muestra al pie de la tarjeta. `omitidos` (opcional) indica cuántos elementos excluyó el productor. El contenido de `datos` depende del producto.
 
 ## 3. Contenido de `datos` por producto
 
@@ -129,22 +142,40 @@ Las referencias a «obligatorio: no» indican que el campo puede omitirse.
 
 **Vigencia:** un aviso está vigente si no está cancelado y `fin` aún no ha pasado. Se recomienda incluir también los avisos recientes ya vencidos, porque el portal los muestra como historial.
 
-### 3.4 `hidro-monitoreo`: monitoreo hidrológico · frecuencia sugerida 10 min
+### 3.4 `hidro-monitoreo`: monitoreo hidrológico · frecuencia sugerida 60 min
 
 ```json
 { "estaciones": [ {
   "id": "socsi", "nombre": "Socsi", "rio": "Cañete", "cuenca": "Cañete", "region_hidrografica": "Pacífico",
   "departamento": "Lima", "provincia": "Cañete", "distritos": ["Nuevo Imperial", "Cañete"], "centros_poblados": ["Cañete"],
   "lat": -13.03051, "lon": -76.20027, "tipo_umbral": "avenida",
+  "variables": ["caudal", "nivel"], "estado": "moderada",
   "umbrales": { "caudal": [42, 54, 69], "nivel": [1.95, 3.06, 4.42] },
   "actual": { "fecha": "2026-11-02T15:00:00-05:00", "caudal": 58.4, "nivel": 3.21 },
-  "serie":  { "inicio": "2026-10-30T16:00:00-05:00", "paso_min": 60, "caudal": [ ... ], "nivel": [ ... ] }
+  "detalle": "estaciones/socsi.json"
 } ] }
 ```
 
-- `tipo_umbral`: con `avenida`, la alerta sube cuando el valor aumenta; con `vaciante`, cuando el valor baja.
-- `actual.caudal: null` indica una estación sin datos (mantenimiento). Se muestra en gris.
-- El estado (normal, moderada, fuerte o extrema) **lo calcula el portal** comparando `actual.caudal` con `umbrales.caudal`.
+| Campo | Obligatorio | Descripción |
+|---|---|---|
+| `id`, `nombre`, `lat`, `lon`, `tipo_umbral`, `actual.fecha` | sí | `actual.fecha` es `null` si la estación nunca transmitió. Con `avenida`, la alerta sube cuando el valor aumenta; con `vaciante`, cuando baja. |
+| `rio`, `cuenca`, `region_hidrografica`, `departamento`, `provincia`, `distritos`, `centros_poblados` | no | Ubicación; su falta no impide mostrar la estación. |
+| `variables` | no | `caudal` y/o `nivel`: las que publica la estación. |
+| `actual.caudal`, `actual.nivel` | no | Último valor, o `null` si no hay. Una estación puede tener solo nivel. |
+| `estado` | no | `sin_datos`, `normal`, `moderada`, `fuerte` o `extrema`. **Si se envía, manda**, para que el portal coincida con el sistema productor. Si no, el portal lo calcula con los umbrales. |
+| `umbrales` | no | Por variable, los 3 valores en orden. Sin umbrales, no se dibujan líneas de umbral. |
+| `detalle` | no | Ruta a un archivo con la serie, relativa a este producto. El portal lo baja **solo al abrir la estación**. Se recomienda frente a `serie` a partir de unas decenas de estaciones. |
+| `serie` | no | Serie horaria dentro del mismo archivo. Solo para pocas estaciones. |
+
+**Archivo de detalle** (`hidro/estaciones/socsi.json`):
+
+```json
+{ "contrato": "1.1", "producto": "hidro-monitoreo-detalle", "id": "socsi", "emitido": "2026-11-02T15:00:00-05:00",
+  "serie": { "inicio": "2026-10-30T16:00:00-05:00", "paso_min": 60, "caudal": [ ... ], "nivel": [ ... ] } }
+```
+
+- Debe publicarse **antes** que el producto que lo menciona. Las horas sin dato van como `null`, para que la serie sea regular.
+- Una estación cuyo último dato tiene más de `horas_sin_datos` (24 h por defecto) se muestra como «sin datos recientes», salvo que su `estado` sea de peligro: ese color viene de un aviso activo y se conserva.
 
 ### 3.5 `hidro-pronostico`: pronóstico hidrológico · frecuencia sugerida 1440 min
 
@@ -158,7 +189,7 @@ Las referencias a «obligatorio: no» indican que el campo puede omitirse.
 } ] }
 ```
 
-Cada modelo debe tener un valor por cada fecha de `pronostico.fechas`. El portal muestra el promedio de los modelos, la banda entre el mínimo y el máximo, y el estado según los umbrales.
+Cada modelo debe tener una posición por cada fecha de `pronostico.fechas`, con `null` si no tiene valor ese día. El portal muestra el promedio de los modelos que tienen valor, la banda entre el mínimo y el máximo, y el estado según los umbrales. `rio`, `departamento`, `umbrales_caudal` y `observado` son opcionales, y `observado.caudal` admite `null`.
 
 ### 3.6 `hidro-avisos`: avisos hidrológicos · frecuencia sugerida 1440 min
 
@@ -177,7 +208,7 @@ Cada modelo debe tener un valor por cada fecha de `pronostico.fechas`. El portal
 } ] }
 ```
 
-`serie`, `peligro`, `recomendacion`, `plazo`, `tendencia`, `estado` y `documento` son opcionales.
+`serie`, `descripcion`, `peligro`, `recomendacion`, `plazo`, `tendencia`, `estado` y `documento` son opcionales, y `valor` admite `null`. En `estacion` solo son obligatorios `id` y `nombre`: un aviso sin coordenadas o sin umbrales se muestra igual, fuera del mapa, porque ocultar un aviso es peor que no ubicarlo.
 
 ## 4. Procedimiento de publicación (obligatorio)
 
@@ -206,8 +237,9 @@ node tools/publicar.mjs salida/hidro-avisos.json --repo /ruta/al/repositorio
 | Situación | Resultado en el portal |
 |---|---|
 | El archivo no cumple el contrato | Se **rechaza**, se conserva la versión anterior y la tarjeta lo indica. |
+| Un elemento no cumple el contrato | Se **omite** ese elemento y la tarjeta indica cuántos faltan (sección 1.1). |
 | El archivo no existe (HTTP 404) | Se conserva la versión anterior y se informa la incidencia. |
-| El repositorio no responde | Franja «Sin conexión» y última versión recibida; reintenta cada 60 s. |
+| El repositorio no responde | Franja «Sin conexión» y última versión recibida; reintenta cada 5 min y al recuperar la red. |
 | No llega una emisión a tiempo | Se marca «desactualizado» cuando supera `frecuencia_min × 2`. |
 | Llega una emisión más antigua que la que ya se tiene | Se ignora. |
 

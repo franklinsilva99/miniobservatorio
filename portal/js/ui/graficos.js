@@ -47,12 +47,13 @@ export function chart({ ser, thr = [], bands = [], band = null, split = null, xl
 
 /** Series de un pronóstico hidrológico: observado (línea), pronóstico (discontinua) y banda mín–máx. */
 export function seriesPronostico(f, pts = false) {
-  const nO = f.obs.length, nF = f.avg.length, last = f.obs[nO - 1], pad = k => Array(k).fill(null);
+  const nO = f.obs.length, nF = f.avg.length, last = nO ? f.obs[nO - 1] : null, pad = k => Array(Math.max(k, 0)).fill(null);
+  const rangos = f.min.map((m, i) => m == null ? null : [m, f.max[i]]);
   return {
-    ser: [{ v: [...f.obs, ...pad(nF)], c: "var(--acc)", pts }, { v: [...pad(nO - 1), last, ...f.avg], c: "var(--acc)", dash: true, pts }],
-    band: [...pad(nO - 1), [last, last], ...f.min.map((m, i) => [m, f.max[i]])],
-    split: nO - 1,
-    xl: [[0, f.fObs[0]], [nO - 1, "Hoy"], [nO + nF - 1, f.fFc[nF - 1]]]
+    ser: [{ v: [...f.obs, ...pad(nF)], c: "var(--acc)", pts }, { v: [...pad(nO - 1), ...(nO ? [last] : []), ...f.avg], c: "var(--acc)", dash: true, pts }],
+    band: [...pad(nO - 1), ...(nO ? [last == null ? null : [last, last]] : []), ...rangos],
+    split: nO ? nO - 1 : null,
+    xl: nO ? [[0, f.fObs[0]], [nO - 1, "Hoy"], [nO + nF - 1, f.fFc[nF - 1]]] : [[0, f.fFc[0]], [nF - 1, f.fFc[nF - 1]]]
   };
 }
 

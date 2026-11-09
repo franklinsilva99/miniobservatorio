@@ -11,13 +11,27 @@ export const CONFIG = {
        Access-Control-Allow-Origin con el dominio del portal. */
   repositorio: "productos/",
 
-  /* Cada cuántos segundos se consulta el manifiesto en busca de productos nuevos.
-     Con monitoreo cada 10 min, 60 s garantiza que un dato aparezca como máximo
-     1 minuto después de publicado (el manifiesto pesa < 1 KB). */
-  intervalo_s: 60,
+  /* Manifiestos a consultar, relativos al repositorio. Cada sistema productor
+     puede publicar el suyo para no pisar al otro, por ejemplo:
+     ["hidro/manifest.json", "manifest.json"]. Si dos declaran el mismo producto,
+     manda el primero de la lista. */
+  manifiestos: ["manifest.json"],
+
+  /* Cada cuántos segundos se consultan los manifiestos. A 300 s un dato aparece
+     hasta unos 6 min después de publicado (sumando dispersion_s), y las visitas
+     simultáneas no consultan todas en el mismo minuto. */
+  intervalo_s: 300,
+
+  /* Espera máxima al azar antes de descargar una emisión nueva, para repartir el
+     pico de descargas. La primera carga de la página no espera. */
+  dispersion_s: 60,
 
   /* Tiempo máximo de espera de cada descarga (ms). */
   timeout_ms: 10000,
+
+  /* Una estación cuyo último dato tiene más de estas horas se muestra como
+     «sin datos recientes», salvo que tenga un aviso activo. */
+  horas_sin_datos: 24,
 
   /* Un producto se marca «desactualizado» cuando su antigüedad supera
      frecuencia_min (declarada en el manifiesto) × tolerancia. */

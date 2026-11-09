@@ -2,7 +2,7 @@
    · Aplicación (HTML/CSS/JS): red primero; si falla, copia en caché.
    · Productos: NO se cachean aquí; los gestiona js/datos/repositorio.js
      (valida cada archivo y guarda solo la última versión válida). */
-const CACHE = "pc-app-v1";
+const CACHE = "pc-app-v2";
 const APP = ["./", "index.html", "css/portal.css", "js/app.js", "js/config.js",
   "js/datos/contrato.js", "js/datos/repositorio.js", "js/datos/modelo.js",
   "js/ui/util.js", "js/ui/estado.js", "js/ui/graficos.js", "js/ui/mosaico.js", "js/ui/detalle.js", "js/geo/peru.js"];

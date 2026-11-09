@@ -52,6 +52,17 @@ El portal **no genera productos**: los generan los sistemas productores que ya e
 
 La alternativa elegida cumple los criterios de minimalismo definidos en el análisis: bajo ancho de banda, alta concurrencia, operación mínima viable y ningún componente de servidor que mantener.
 
+### Escala: muchas estaciones y mucho tráfico
+
+El contrato 1.1 está pensado para más de 500 estaciones y picos de tráfico, sin nube, con Nginx en servidores de la institución:
+
+- **Resumen y detalle separados:** el mosaico baja el valor actual de cada estación; la serie se pide solo al abrirla.
+- **Menos descargas simultáneas:** consulta cada 5 minutos, espera al azar antes de bajar una emisión nueva, y las pestañas ocultas no consultan.
+- **Un manifiesto por sistema:** dos productores no se pisan y la caída de uno no afecta al otro.
+- **Publicación por producto:** monitoreo cuando hay datos nuevos; si dejan de llegar, el portal lo marca como desactualizado.
+
+El límite real es el enlace de internet. Si no alcanza, se agregan servidores Nginx detrás de un balanceador o se amplía el enlace, sin cambiar el código. Antes de comprometer una cifra de usuarios hay que hacer una prueba de carga sobre la infraestructura real.
+
 ## 3. Flujo de recepción de un producto
 
 ```mermaid
@@ -130,7 +141,7 @@ sw.js ────────────────────────�
 2. **Repositorio de productos:** una carpeta servida por HTTP con la estructura de `productos/`.
    - Si está en el **mismo servidor** que el portal, se usa `repositorio: "productos/"`.
    - Si está en **otro servidor**, se usa su URL en `js/config.js` y ese servidor debe enviar `Access-Control-Allow-Origin: <dominio del portal>`.
-3. **Cabeceras recomendadas** para `manifest.json` y los productos: `Cache-Control: no-cache`. El portal también agrega `?v=<emitido>` a cada descarga.
+3. **Cabeceras recomendadas** para los manifiestos: `Cache-Control: no-cache`, con revalidación. Los productos y detalles se piden con `?v=<emitido>`: el servidor debe respetar esa consulta y puede servirlos ya comprimidos. Se recomienda HTTP/2 cuando haya HTTPS.
 4. **Resiliencia recomendada:** alojar el portal y el repositorio **fuera** de la infraestructura principal (otro centro de datos o nube), porque su función es justamente operar cuando la infraestructura principal falla.
 
 ## 7. Fuera del alcance de esta fase
