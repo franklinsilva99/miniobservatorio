@@ -8,6 +8,10 @@ node_modules/
 *.tmp
 *.log
 
+# Repositorio de productos: lo llenan los sistemas productores con datos reales; no se sube.
+portal/productos/*
+!portal/productos/.gitkeep
+
 # Archivos de sistema
 Thumbs.db
 desktop.ini

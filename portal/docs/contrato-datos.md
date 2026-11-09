@@ -3,7 +3,7 @@
 Este documento define **qué archivos debe publicar cada sistema productor** para que el Portal de Contingencia los muestre. Es el único punto de acuerdo entre los sistemas: el portal no depende de su tecnología, base de datos ni API.
 
 - **Validación automática:** el contrato está implementado en `js/datos/contrato.js`. El portal y las herramientas `tools/validar.mjs` y `tools/publicar.mjs` usan ese mismo archivo, así que **si un producto pasa el validador, el portal lo acepta**.
-- **Ejemplos completos:** la carpeta `productos/` tiene los seis productos de demostración.
+- **Ejemplos:** cada producto tiene su ejemplo en la sección 3. Para comprobar un repositorio publicado: `node tools/validar.mjs <carpeta>`.
 
 ## 1. Reglas generales
 

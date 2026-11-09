@@ -12,10 +12,11 @@ export const CONFIG = {
   repositorio: "productos/",
 
   /* Manifiestos a consultar, relativos al repositorio. Cada sistema productor
-     puede publicar el suyo para no pisar al otro, por ejemplo:
-     ["hidro/manifest.json", "manifest.json"]. Si dos declaran el mismo producto,
-     manda el primero de la lista. */
-  manifiestos: ["manifest.json"],
+     publica el suyo para no pisar al otro. Por ahora solo publica hidrología;
+     cuando meteorología publique, se agrega el suyo, por ejemplo:
+     ["hidro/manifest.json", "meteo/manifest.json"]. Si dos declaran el mismo
+     producto, manda el primero de la lista. */
+  manifiestos: ["hidro/manifest.json"],
 
   /* Cada cuántos segundos se consultan los manifiestos. A 300 s un dato aparece
      hasta unos 6 min después de publicado (sumando dispersion_s), y las visitas

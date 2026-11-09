@@ -22,41 +22,40 @@ Sistemas productores ──publican──▶ Repositorio (manifiestos + 6 JSON) 
 | Recepción de productos: manifiesto, validación, rechazo, copia local y estados | Logotipos oficiales y datos de contacto definitivos |
 | Contrato de datos 1.1 con validador automático | Exportación de PNG y PDF desde el portal |
 | Herramientas para publicar y validar (productores) | Despliegue en la infraestructura del SENAMHI |
-| Repositorio de **demostración** con datos de ejemplo de las PoC | |
+| Publicación real de hidrología (backend de `senamhi-hidrologia`) | Publicación de meteorología |
 
-> Los productos de `productos/` son **datos de ejemplo** basados en las PoC `senamhi-hidrologia` y `senamhi-pronostico-dashboard`. El portal muestra la franja «Repositorio de demostración» mientras `manifest.json` tenga `"demo": true`.
+> Por ahora solo publica **hidrología**: su backend escribe en `productos/hidro/`. Las tarjetas de meteorología se muestran como «no disponible» hasta que su sistema publique. La carpeta `productos/` no se sube a git porque tiene datos reales.
 
 ## Requisitos
 
 - **Para usar el portal:** un navegador actual (Edge, Chrome, Firefox o Safari de los últimos 2 años).
-- **Para las herramientas y la demostración local:** [Node.js](https://nodejs.org) 18 o superior. **No se instalan dependencias** (no hay `npm install`).
+- **Para las herramientas y la prueba local:** [Node.js](https://nodejs.org) 18 o superior. **No se instalan dependencias** (no hay `npm install`).
 
-## Ejecutar la demostración
+## Ver el portal en local
+
+1. Arrancar el backend de hidrología con la publicación encendida y apuntando a la carpeta `productos/` de este portal:
+   `--hidrologia.portal.programado=true --hidrologia.portal.demo=false --hidrologia.portal.carpeta=<ruta>/portal/productos`.
+   Publica un minuto después de cada corrida del control de calidad (cada 5 minutos).
+2. Levantar el portal:
 
 ```bash
 cd portal
-node tools/generar-ejemplos.mjs    # 1. fecha los productos de ejemplo a la hora actual
-node tools/servidor.mjs 8731       # 2. levanta el portal en http://localhost:8731
+node tools/servidor.mjs 8731       # http://localhost:8731
 ```
 
-Si el puerto está ocupado, se puede usar otro, por ejemplo `node tools/servidor.mjs 9000`.
-
-> **Conviene ejecutar el paso 1 antes de cada demostración.** Si los productos tienen días de antigüedad, el portal los marcará como «desactualizados» y los avisos aparecerán vencidos. Así es como debe comportarse.
-
-Para una demostración larga se puede usar `node tools/generar-ejemplos.mjs --continuo` en otra terminal. Vuelve a publicar cada 10 minutos, y el portal muestra los datos nuevos en unos 6 minutos como máximo.
+Si el puerto está ocupado, se puede usar otro, por ejemplo `node tools/servidor.mjs 9000`. Para comprobar lo publicado: `node tools/validar.mjs productos`.
 
 Las pruebas automáticas se ejecutan con `node --test "tools/pruebas/*.test.mjs"` (Node 22 o superior).
 
 El portal **no funciona abriendo `index.html` con doble clic** (`file://`), porque el navegador bloquea la lectura de los JSON. Hay que servirlo por HTTP.
 
-### Cómo mostrar la resiliencia en la demostración
+### Cómo comprobar la resiliencia
 
-| Para mostrar… | Hacer… |
+| Para comprobar… | Hacer… |
 |---|---|
-| Un producto rechazado | Editar `productos/meteo/avisos.json`, poner `"nivel": "roja"` en un aviso y cambiar su `emitido` (en el archivo y en `manifest.json`). |
-| Un producto que no llegó | Renombrar `productos/hidro/pronostico.json` y cambiar su `emitido` en `manifest.json`. |
+| Un producto que no llegó | Renombrar `productos/hidro/avisos.json` y esperar al siguiente ciclo del portal. |
 | Repositorio caído | Herramientas de desarrollo del navegador (F12) → Red → «Sin conexión» y esperar al siguiente ciclo, o recargar. |
-| Restaurar | `node tools/generar-ejemplos.mjs` |
+| Restaurar | Borrar `productos/hidro/`: el backend vuelve a publicar todo en su siguiente corrida. |
 
 ## Estructura
 
@@ -77,14 +76,13 @@ portal/
 │   ├── ui/estado.js           Estado de la interfaz
 │   ├── ui/util.js             Formato SI, fechas (hora de Lima), iconos
 │   └── geo/peru.js            Cartografía base (límites INEI)
-├── productos/                 Repositorio de DEMOSTRACIÓN (manifest.json + 6 productos)
+├── productos/                 Repositorio de productos: lo llenan los productores (no se sube a git)
 ├── tools/                     Herramientas en Node, sin dependencias (no se despliegan)
-│   ├── generar-ejemplos.mjs   Genera el repositorio de demostración
 │   ├── publicar.mjs           Valida y publica un producto (referencia para productores)
 │   ├── validar.mjs            Valida un repositorio completo
 │   ├── lib-publicacion.mjs    Publicación atómica + manifiesto
 │   ├── servidor.mjs           Servidor estático local
-│   └── semilla/               Catálogo de estaciones de la PoC meteorológica
+│   └── pruebas/               Pruebas automáticas
 └── docs/
     ├── arquitectura.md        Decisión de arquitectura, flujos, estados y despliegue
     ├── arquitectura.svg       Diagrama (se puede insertar en el informe)
@@ -96,7 +94,7 @@ portal/
 | Clave | Por defecto | Descripción |
 |---|---|---|
 | `repositorio` | `"productos/"` | URL del repositorio. Si es otro dominio, ese servidor debe enviar la cabecera CORS. |
-| `manifiestos` | `["manifest.json"]` | Manifiestos a consultar, relativos al repositorio. Cada sistema productor puede tener el suyo. |
+| `manifiestos` | `["hidro/manifest.json"]` | Manifiestos a consultar, relativos al repositorio. Cada sistema productor tiene el suyo; por ahora solo hidrología. |
 | `intervalo_s` | `300` | Frecuencia de consulta de los manifiestos, en segundos. |
 | `dispersion_s` | `60` | Espera máxima al azar antes de bajar una emisión nueva. La primera carga no espera. |
 | `horas_sin_datos` | `24` | A partir de estas horas, una estación sin aviso activo se muestra como «sin datos recientes». |

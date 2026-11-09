@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" font-family="Segoe UI, Arial, sans-serif" role="img" aria-labelledby="t d">
   <title id="t">Arquitectura del Portal de Contingencia</title>
-  <desc id="d">Los sistemas productores validan y publican archivos JSON en un repositorio independiente; el portal los lee cada 60 segundos, los valida y guarda la última versión válida en el navegador.</desc>
+  <desc id="d">Los sistemas productores validan y publican archivos JSON en un repositorio independiente; el portal los lee cada 5 minutos, los valida y guarda la última versión válida en el navegador.</desc>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#002259"/></marker>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0e7c86"/></marker>
@@ -60,7 +60,7 @@
     <text x="860" y="164" font-size="16" font-weight="700" fill="#ffffff">Frontend estático</text>
     <text x="860" y="184" font-size="12" fill="#c9d7ee">HTML + CSS + JS · sin frameworks · ~150 KB</text>
     <g font-size="13" fill="#ffffff">
-      <text x="860" y="214">1. Lee manifest.json cada 60 s</text>
+      <text x="860" y="214">1. Lee manifest.json cada 5 min</text>
       <text x="860" y="236">2. Descarga solo lo que cambió</text>
       <text x="860" y="258">3. Valida contra el contrato 1.0</text>
       <text x="860" y="280">4. Dibuja el mosaico de 6 productos</text>

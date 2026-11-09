@@ -26,7 +26,7 @@ El portal **no genera productos**: los generan los sistemas productores que ya e
  ┌──────────────────────┐ 1.valida  ┌───────────────────────────┐  3.lee  ┌──────────────────────┐
  │ Sistema meteorológico│ 2.publica │ manifest.json             │◀─fetch──│ Mosaico (6 productos)│
  │ (monitoreo, pronóst.,├──────────▶│ meteo/monitoreo.json      │  cada   │ + vistas ampliadas   │
- │  avisos)             │  SFTP /   │ meteo/pronostico.json     │  60 s   │                      │
+ │  avisos)             │  SFTP /   │ meteo/pronostico.json     │  5 min  │                      │
  └──────────────────────┘  rsync /  │ meteo/avisos.json         │         │ valida contra el     │
  ┌──────────────────────┐  carpeta  │ hidro/monitoreo.json      │         │ contrato; si falla,  │
  │ Sistema hidrológico  ├──────────▶│ hidro/pronostico.json     │         │ conserva la versión  │
@@ -79,7 +79,7 @@ sequenceDiagram
     P->>R: Actualiza manifest.json AL FINAL
     Note over N,L: Al abrir el portal
     N->>L: Lee la última versión válida (se ve al instante, incluso sin red)
-    loop cada 60 s, al volver a la pestaña o al recuperar la red
+    loop cada 5 min, al volver a la pestaña o al recuperar la red
         N->>R: GET manifest.json
         alt el «emitido» de un producto cambió
             N->>R: GET producto.json?v=<emitido>
