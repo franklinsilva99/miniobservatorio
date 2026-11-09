@@ -12,6 +12,9 @@ const docLink = doc => { const u = doc && urlRepositorio(doc); return u ? `<p st
 const vacio = t => ({ map: peru({ aria: "Mapa del Perú" }), panel: panelCard("", `<div class="empty">${ICON.off}<b>Producto no disponible</b><span>${t}</span></div>`) });
 /* Con muchas estaciones, los nombres taparían el mapa y la tabla pesaría demasiado: se muestran las más críticas. */
 const MAX_ETIQUETAS = 40, MAX_FILAS = 50;
+/* En series horarias se unen datos separados hasta 12 h: cubre las lecturas convencionales (06, 10,
+   14 y 18 h) y la noche; un hueco mayor (un día sin datos) queda cortado. */
+const HUECO_HORAS = 12;
 const lineasUmbral = u => u ? [{ v: u[0], c: LVC(2), l: "Moderada" }, { v: u[1], c: LVC(3), l: "Fuerte" }, { v: u[2], c: LVC(4), l: "Extrema" }] : [];
 const ultimoDato = x => x.q != null ? `${fmt(x.q)} m³/s` : x.niv != null ? `${fmt(x.niv, 2)} m` : "—";
 
@@ -29,7 +32,7 @@ export const DET = {
     const carga = s.detalle && !ser.length ? pedirDetalle("hidro-monitoreo", s.idOrigen, s.detalle) : "ok";
     const grafico = carga === "cargando" ? `<p class="muted" style="font-size:12.5px;margin:0"><span class="spin" aria-hidden="true"></span> Cargando la serie de la estación…</p>`
       : carga === "error" ? `<p class="muted" style="font-size:12.5px;margin:0">No se pudo cargar la serie de esta estación. Se reintentará al volver a abrirla con conexión.</p>`
-        : `${chart({ ser: [{ v: ser, c: "var(--acc)", pts: S.hmon.agg === "d" }], thr: lineasUmbral(u), xl, aria: `Hidrograma de ${s.n}` })}`;
+        : `${chart({ ser: [{ v: ser, c: "var(--acc)", pts: S.hmon.agg === "d", hueco: S.hmon.agg === "d" ? 1 : HUECO_HORAS }], thr: lineasUmbral(u), xl, aria: `Hidrograma de ${s.n}` })}`;
     const hayFilas = M.HST.length > MAX_FILAS, filas = [...M.HST].sort((a, b) => b.s - a.s).slice(0, MAX_FILAS);
     return {
       legend: `<b>Estado por umbral</b>${UML.map(([l, t]) => `<span><i style="background:${LVC(l)}"></i>${t}</span>`).join("")}`,
@@ -79,7 +82,7 @@ export const DET = {
         (a ? panelCard(`<div><div class="eyebrow">Aviso N° ${a.nro} · emitido ${emisionLarga(a.emitido)}</div><h3>${a.titulo}</h3></div>${chipAv(a.nivel)}`,
           `<dl class="dl"><dt>Fecha de inicio</dt><dd>${a.ini}</dd><dt>Fecha de final</dt><dd>${a.vence}</dd><dt>Plazo</dt><dd>${a.plazo} · ${fmt(a.dur)} h</dd><dt>Tipo</dt><dd>${a.tipo === "avenida" ? "Avenida" : "Vaciante"}</dd></dl>
         ${a.desc ? `<p class="txt" style="margin-top:10px">${a.desc}</p>` : ""}
-        ${n ? `<div style="margin-top:10px">${chart({ ser: [{ v: a.serie, c: "#1d4ed8" }], bands, xl: [[0, `−${n} h`], [Math.floor(n / 2), `−${Math.ceil(n / 2)} h`], [n - 1, "Emisión"]], aria: `Hidrograma del aviso ${a.nro}` })}</div>
+        ${n ? `<div style="margin-top:10px">${chart({ ser: [{ v: a.serie, c: "#1d4ed8", hueco: HUECO_HORAS }], bands, xl: [[0, `−${n} h`], [Math.floor(n / 2), `−${Math.ceil(n / 2)} h`], [n - 1, "Emisión"]], aria: `Hidrograma del aviso ${a.nro}` })}</div>
         <div class="chart-leg">${legItem("#1d4ed8", `${a.var === "nivel" ? "Nivel" : "Caudal"} (${a.uni})`)}<span><i style="background:${LVC(2)};opacity:.5;height:8px"></i><span class="muted">Umbral moderada</span></span><span><i style="background:${LVC(3)};opacity:.5;height:8px"></i><span class="muted">Fuerte</span></span><span><i style="background:${LVC(4)};opacity:.5;height:8px"></i><span class="muted">Extrema</span></span></div>` : ""}
         <table class="tb" style="margin-top:10px"><thead><tr><th>Cuerpo de agua</th><th>Estación</th><th class="num">${a.var === "nivel" ? "Nivel" : "Caudal"} (${a.uni})</th><th class="num">Umbral extrema</th></tr></thead><tbody><tr><td>Río ${s.rio}</td><td>${s.n}</td><td class="num">${fmt(a.val, 2)}</td><td class="num">${fmt(u?.[2])}</td></tr></tbody></table>${docLink(a.doc)}`) +
           panelCard(`<h3>Zonas de posible afectación</h3>`, `<dl class="dl"><dt>Centros poblados</dt><dd>${s.pob.join(", ") || "—"}</dd><dt>Departamento</dt><dd>${s.dep}</dd><dt>Provincia</dt><dd>${s.prov}</dd><dt>Distritos</dt><dd>${s.dist.join(", ") || "—"}</dd></dl>

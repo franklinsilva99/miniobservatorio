@@ -36,9 +36,18 @@ export function chart({ ser, thr = [], bands = [], band = null, split = null, xl
   thr.forEach(t => { g += `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(t.v)}" y2="${Y(t.v)}" stroke="${t.c}" stroke-dasharray="5 3" stroke-width="1.4"/><text x="${W - P.r - 2}" y="${Y(t.v) - 3}" text-anchor="end" font-size="8.5" font-weight="600" fill="${t.c}" stroke="var(--surface)" stroke-width="2.5" paint-order="stroke">${t.l}</text>`; });
   ser.forEach(s => {
     if (s.bar) { const bw = (W - P.l - P.r) / n * .7; s.v.forEach((v, i) => { if (v > 0) g += `<rect x="${X(i) - bw / 2}" y="${Y(v)}" width="${bw}" height="${Y(mn) - Y(v)}" fill="${s.c}"/>`; }); return; }
-    let d = "", on = false; s.v.forEach((v, i) => { if (v == null) { on = false; return; } d += (on ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1); on = true; });
+    /* s.hueco: hasta cuántas posiciones de distancia se unen dos datos (1 = solo seguidos). Así una
+       estación convencional (lecturas a las 06, 10, 14 y 18 h) se ve como línea; un hueco mayor queda
+       cortado. Un dato sin vecino unido se marca con un punto para que no desaparezca. */
+    const hueco = s.hueco || 1, idx = s.v.map((v, i) => v == null ? -1 : i).filter(i => i >= 0);
+    let d = ""; const solo = [];
+    idx.forEach((i, k) => {
+      const unidoAntes = k > 0 && i - idx[k - 1] <= hueco, unidoDespues = k < idx.length - 1 && idx[k + 1] - i <= hueco;
+      d += (unidoAntes ? "L" : "M") + X(i).toFixed(1) + " " + Y(s.v[i]).toFixed(1);
+      if (!unidoAntes && !unidoDespues) solo.push(i);
+    });
     g += `<path d="${d}" fill="none" stroke="${s.c}" stroke-width="${s.w || 2.2}" stroke-linejoin="round" ${s.dash ? 'stroke-dasharray="5 4"' : ""}/>`;
-    if (s.pts) s.v.forEach((v, i) => { if (v != null) g += `<circle cx="${X(i)}" cy="${Y(v)}" r="2.6" fill="${s.c}"/>`; });
+    (s.pts ? idx : solo).forEach(i => { g += `<circle cx="${X(i)}" cy="${Y(s.v[i])}" r="2.6" fill="${s.c}"/>`; });
   });
   if (split != null) g += `<line x1="${X(split)}" x2="${X(split)}" y1="${P.t}" y2="${H - P.b}" stroke="var(--muted)" stroke-dasharray="2 2"/>`;
   xl.forEach(([i, t], k) => g += `<text x="${X(i)}" y="${H - 7}" text-anchor="${k === 0 ? "start" : k === xl.length - 1 ? "end" : "middle"}" font-size="9" fill="var(--muted)">${t}</text>`);
